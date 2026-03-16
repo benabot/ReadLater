@@ -50,8 +50,8 @@ ReadLater AI vit dans votre barre de menus — pas d'icône dans le Dock, pas de
 ### Compilation
 
 ```bash
-git clone https://github.com/benoitabot/ReadLaterAI.git
-cd ReadLaterAI
+git clone https://github.com/benabot/ReadLater.git
+cd ReadLater
 
 # Ouvrir dans Xcode
 open ReadLaterAI.xcodeproj

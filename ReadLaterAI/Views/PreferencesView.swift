@@ -552,7 +552,7 @@ struct GeneralSettingsSection: View {
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 12) {
-                    Link("GitHub", destination: URL(string: "https://github.com/benoitabot")!)
+                    Link("GitHub", destination: URL(string: "https://github.com/benabot/ReadLater")!)
                     Link("Site web", destination: URL(string: "https://beabot.fr")!)
                 }
                 .font(.caption)
