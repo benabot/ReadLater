@@ -3,16 +3,29 @@ import SwiftData
 import UniformTypeIdentifiers
 
 // MARK: - ContentView
-// Vue principale du popover avec navigation inline.
 
 struct ContentView: View {
 
-    enum ViewMode {
+    enum ViewMode: Equatable {
         case articles
         case safariImport(URL)
         case preferences
         case onboarding
         case help
+
+        static func == (lhs: ViewMode, rhs: ViewMode) -> Bool {
+            switch (lhs, rhs) {
+            case (.articles, .articles),
+                 (.preferences, .preferences),
+                 (.onboarding, .onboarding),
+                 (.help, .help):
+                return true
+            case (.safariImport(let a), .safariImport(let b)):
+                return a == b
+            default:
+                return false
+            }
+        }
     }
 
     @Environment(\.modelContext) private var modelContext
@@ -26,47 +39,46 @@ struct ContentView: View {
     @State private var extractor = ArticleExtractor()
     @State private var clipboardMonitor = ClipboardMonitor()
     @State private var viewMode: ViewMode = .articles
-
-    // Premier lancement — afficher l'onboarding une seule fois.
-    // @AppStorage persiste la valeur dans UserDefaults.
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
 
     var onQuit: (() -> Void)?
 
     var body: some View {
-        Group {
+        ZStack {
             switch viewMode {
             case .articles:
                 articlesView
+                    .transition(.opacity)
             case .safariImport(let url):
                 SafariImportView(
                     bookmarksFileURL: url,
-                    onDismiss: { withAnimation { viewMode = .articles } }
+                    onDismiss: { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .articles } }
                 )
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             case .preferences:
                 PreferencesView(
-                    onDismiss: { withAnimation { viewMode = .articles } }
+                    onDismiss: { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .articles } }
                 )
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             case .onboarding:
                 OnboardingView(
                     onDismiss: {
                         hasSeenOnboarding = true
-                        withAnimation { viewMode = .articles }
+                        withAnimation(.easeInOut(duration: 0.3)) { viewMode = .articles }
                     }
                 )
+                .transition(.opacity)
             case .help:
                 HelpView(
-                    onDismiss: { withAnimation { viewMode = .articles } }
+                    onDismiss: { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .articles } }
                 )
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
-        .frame(width: 380, height: 520)
+        .frame(width: 400, height: 540)
         .task { clipboardMonitor.start() }
         .onAppear {
-            // Afficher l'onboarding au tout premier lancement
-            if !hasSeenOnboarding {
-                viewMode = .onboarding
-            }
+            if !hasSeenOnboarding { viewMode = .onboarding }
         }
     }
 
@@ -75,15 +87,13 @@ struct ContentView: View {
     private var articlesView: some View {
         VStack(spacing: 0) {
             headerSection
-            Divider()
-
+            
             if let detected = clipboardMonitor.detectedURL {
                 clipboardBanner(url: detected)
             }
 
             articleListSection
 
-            Divider()
             footerSection
         }
     }
@@ -91,96 +101,105 @@ struct ContentView: View {
     // MARK: - Header
 
     private var headerSection: some View {
-        VStack(spacing: 6) {
-            HStack(spacing: 8) {
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
                 Image(systemName: "link.badge.plus")
+                    .font(.callout)
                     .foregroundStyle(.secondary)
-                    .font(.caption)
 
                 TextField("Coller ou saisir une URL…", text: $urlInput)
                     .textFieldStyle(.plain)
-                    .font(.system(.body, design: .default))
+                    .font(.body)
                     .onSubmit { addArticle() }
 
                 if isLoading {
                     ProgressView()
                         .controlSize(.small)
                 } else {
-                    Button {
-                        addArticle()
-                    } label: {
+                    Button { addArticle() } label: {
                         Image(systemName: "arrow.right.circle.fill")
-                            .font(.title3)
+                            .font(.title2)
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(urlInput.isEmpty ? Color.gray.opacity(0.3) : Color.accentColor)
+                    .foregroundStyle(urlInput.isEmpty ? Color.gray.opacity(0.2) : Color.accentColor)
                     .disabled(urlInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
-            .background(Color.primary.opacity(0.03))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
 
             if let errorMessage {
                 HStack(spacing: 4) {
-                    Image(systemName: "exclamationmark.circle")
-                        .font(.caption2)
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .font(.caption)
                     Text(errorMessage)
-                        .font(.caption2)
+                        .font(.caption)
                 }
                 .foregroundStyle(.red)
+                .padding(.horizontal, 14)
+                .padding(.bottom, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
+
+            Divider()
         }
-        .padding(10)
     }
 
     // MARK: - Clipboard Banner
 
     private func clipboardBanner(url: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "doc.on.clipboard.fill")
-                .font(.caption)
-                .foregroundStyle(.blue)
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
+                Image(systemName: "doc.on.clipboard.fill")
+                    .font(.callout)
+                    .foregroundStyle(.blue)
 
-            Text(url)
-                .font(.caption)
-                .lineLimit(1)
-                .truncationMode(.middle)
-                .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("URL détectée")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.blue)
+                    Text(url)
+                        .font(.caption)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .foregroundStyle(.secondary)
+                }
 
-            Spacer()
+                Spacer()
 
-            Button {
-                urlInput = url
-                clipboardMonitor.clearDetectedURL()
-                addArticle()
-            } label: {
-                Text("Ajouter")
-                    .font(.caption2)
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Color.blue.opacity(0.15))
-                    .clipShape(Capsule())
+                Button {
+                    urlInput = url
+                    clipboardMonitor.clearDetectedURL()
+                    addArticle()
+                } label: {
+                    Text("Ajouter")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .background(Color.blue)
+                        .foregroundStyle(.white)
+                        .clipShape(Capsule())
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    withAnimation { clipboardMonitor.clearDetectedURL() }
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.callout)
+                        .foregroundStyle(.tertiary)
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
-            .foregroundStyle(.blue)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Color.blue.opacity(0.06))
 
-            Button {
-                clipboardMonitor.clearDetectedURL()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.caption2)
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(.tertiary)
+            Divider()
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(Color.blue.opacity(0.05))
         .transition(.move(edge: .top).combined(with: .opacity))
     }
 
@@ -189,75 +208,106 @@ struct ContentView: View {
     private var articleListSection: some View {
         Group {
             if articles.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "text.page")
-                        .font(.system(size: 32))
-                        .foregroundStyle(.quaternary)
-                    Text("Aucun article")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    Text("Collez une URL ou importez depuis Safari")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                emptyState
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 0) {
+                    LazyVStack(spacing: 1) {
                         ForEach(articles) { article in
                             ArticleRow(article: article)
-                            if article.id != articles.last?.id {
-                                Divider().padding(.leading, 12)
-                            }
                         }
                     }
+                    .padding(.vertical, 4)
                 }
             }
+        }
+        .frame(maxHeight: .infinity)
+    }
+
+    // MARK: - Empty State
+
+    private var emptyState: some View {
+        VStack(spacing: 16) {
+            Spacer()
+
+            // Icône stylisée
+            ZStack {
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.accentColor.opacity(0.08))
+                    .frame(width: 72, height: 72)
+
+                Image(systemName: "text.page.badge.magnifyingglass")
+                    .font(.system(size: 30))
+                    .foregroundStyle(Color.accentColor.opacity(0.5))
+            }
+
+            VStack(spacing: 6) {
+                Text("Prêt à lire plus tard")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+
+                Text("Collez une URL ci-dessus ou importez\nvos articles depuis Safari")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            // Raccourci visuel
+            HStack(spacing: 16) {
+                emptyStateHint(icon: "link", text: "Coller une URL")
+                emptyStateHint(icon: "safari", text: "Import Safari")
+                emptyStateHint(icon: "doc.on.clipboard", text: "Auto-détection")
+            }
+            .padding(.top, 4)
+
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+    }
+
+    private func emptyStateHint(icon: String, text: String) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.callout)
+                .foregroundStyle(.tertiary)
+            Text(text)
+                .font(.caption2)
+                .foregroundStyle(.quaternary)
         }
     }
 
     // MARK: - Footer
 
     private var footerSection: some View {
-        HStack(spacing: 12) {
-            // Boutons d'action à gauche
-            HStack(spacing: 2) {
-                FooterButton(icon: "gearshape", label: nil) {
-                    withAnimation { viewMode = .preferences }
+        VStack(spacing: 0) {
+            Divider()
+            HStack(spacing: 0) {
+                FooterButton(icon: "gearshape", tooltip: "Préférences") {
+                    withAnimation(.easeInOut(duration: 0.2)) { viewMode = .preferences }
                 }
-
-                FooterButton(icon: "safari", label: nil) {
+                FooterButton(icon: "safari", tooltip: "Import Safari") {
                     openSafariBookmarks()
                 }
-            }
 
-            Spacer()
+                Spacer()
 
-            if !articles.isEmpty {
-                Text("\(articles.count)")
-                    .font(.system(.caption2, design: .rounded))
-                    .fontWeight(.medium)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Color.primary.opacity(0.06))
-                    .clipShape(Capsule())
-                    .foregroundStyle(.tertiary)
-            }
-
-            Spacer()
-
-            HStack(spacing: 2) {
-                FooterButton(icon: "questionmark.circle", label: nil) {
-                    withAnimation { viewMode = .help }
+                if !articles.isEmpty {
+                    Text("\(articles.count) article\(articles.count > 1 ? "s" : "")")
+                        .font(.caption)
+                        .foregroundStyle(.quaternary)
                 }
 
-                FooterButton(icon: "power", label: nil) {
+                Spacer()
+
+                FooterButton(icon: "questionmark.circle", tooltip: "Aide") {
+                    withAnimation(.easeInOut(duration: 0.2)) { viewMode = .help }
+                }
+                FooterButton(icon: "power", tooltip: "Quitter") {
                     onQuit?()
                 }
             }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 4)
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
     }
 
     // MARK: - Actions
@@ -276,7 +326,7 @@ struct ContentView: View {
 
         let response = panel.runModal()
         if response == .OK, let url = panel.url {
-            withAnimation { viewMode = .safariImport(url) }
+            withAnimation(.easeInOut(duration: 0.2)) { viewMode = .safariImport(url) }
         }
     }
 
@@ -327,24 +377,28 @@ struct ContentView: View {
 
 struct FooterButton: View {
     let icon: String
-    let label: String?
+    let tooltip: String
     let action: () -> Void
+
+    @State private var isHovered = false
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 4) {
-                Image(systemName: icon)
-                    .font(.body)
-                if let label {
-                    Text(label)
-                        .font(.caption)
-                }
-            }
-            .padding(8)
-            .contentShape(Rectangle())
+            Image(systemName: icon)
+                .font(.callout)
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(isHovered ? Color.primary.opacity(0.06) : Color.clear)
+                )
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(.secondary)
+        .foregroundStyle(isHovered ? .primary : .secondary)
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.15)) { isHovered = hovering }
+        }
+        .help(tooltip)
     }
 }
 
@@ -356,77 +410,57 @@ struct ArticleRow: View {
     @State private var isSummarizing = false
     @State private var summaryError: String?
     @State private var isExpanded = false
+    @State private var isHovered = false
     @AppStorage("selectedProvider") private var selectedProvider: String = "ollama"
     @AppStorage("summaryLanguage") private var summaryLanguage: String = "français"
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Titre + bouton actions
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .top, spacing: 10) {
+                // Initiale du domaine — identité visuelle de la source
+                siteInitial
+
+                VStack(alignment: .leading, spacing: 4) {
+                    // Titre
                     Text(article.title)
-                        .font(.system(.subheadline, weight: .medium))
-                        .lineLimit(isExpanded ? 4 : 1)
+                        .font(.system(.body, weight: .medium))
+                        .lineLimit(isExpanded ? 4 : 2)
+                        .foregroundStyle(.primary)
 
+                    // Domaine
                     Text(displayURL)
-                        .font(.caption2)
+                        .font(.caption)
                         .foregroundStyle(.tertiary)
-                        .lineLimit(1)
-                }
 
-                Spacer(minLength: 8)
+                    // Métadonnées
+                    HStack(spacing: 5) {
+                        Text(article.dateAdded, format: .dateTime.day().month(.abbreviated))
+                            .foregroundStyle(.quaternary)
 
-                // Badges & actions
-                HStack(spacing: 6) {
-                    if article.summary != nil {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.green)
-                    } else if article.extractedText == nil {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.orange)
-                    } else if isSummarizing {
-                        ProgressView()
-                            .controlSize(.mini)
-                    } else {
-                        Button { summarizeArticle() } label: {
-                            Image(systemName: "sparkles")
-                                .font(.caption)
+                        if article.wordCount > 0 {
+                            Text("·").foregroundStyle(.quaternary)
+                            Text("\(article.wordCount) mots").foregroundStyle(.quaternary)
                         }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.purple)
-                        .help("Résumer avec l'IA")
+
+                        if let summary = article.summary {
+                            Text("·").foregroundStyle(.quaternary)
+                            Text("~\(summary.readingTime) min").foregroundStyle(.quaternary)
+                        }
                     }
-                }
-            }
-
-            // Métadonnées
-            HStack(spacing: 6) {
-                Text(article.dateAdded, format: .dateTime.day().month(.abbreviated))
                     .font(.caption2)
-                    .foregroundStyle(.quaternary)
-
-                if article.wordCount > 0 {
-                    Text("·")
-                        .foregroundStyle(.quaternary)
-                    Text("\(article.wordCount) mots")
-                        .font(.caption2)
-                        .foregroundStyle(.quaternary)
                 }
 
-                if let summary = article.summary {
-                    Text("·")
-                        .foregroundStyle(.quaternary)
-                    Text("~\(summary.readingTime) min")
-                        .font(.caption2)
-                        .foregroundStyle(.quaternary)
-                }
+                Spacer(minLength: 4)
+
+                // Action badge
+                actionBadge
             }
 
             // Résumé expandé
             if let summary = article.summary, isExpanded {
                 expandedSummary(summary)
+                    .padding(.leading, 42) // Aligné avec le contenu (après l'initiale)
+                    .padding(.top, 8)
             }
 
             // Erreur
@@ -435,50 +469,116 @@ struct ArticleRow: View {
                     .font(.caption2)
                     .foregroundStyle(.red)
                     .lineLimit(2)
+                    .padding(.leading, 42)
+                    .padding(.top, 4)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isHovered ? Color.primary.opacity(0.03) : Color.clear)
+        )
         .contentShape(Rectangle())
         .onTapGesture {
             if article.summary != nil {
                 withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
             }
         }
+        .onHover { hovering in
+            withAnimation(.easeInOut(duration: 0.12)) { isHovered = hovering }
+        }
         .contextMenu { ExportMenuView(article: article) }
-        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button(role: .destructive) {
-                withAnimation { modelContext.delete(article) }
-            } label: {
-                Label("Supprimer", systemImage: "trash")
+    }
+
+    // MARK: - Site Initial
+
+    /// Affiche la première lettre du domaine dans un cercle coloré.
+    /// Donne une identité visuelle à chaque source (comme les avatars dans Mail).
+    private var siteInitial: some View {
+        let domain = URL(string: article.url)?.host ?? "?"
+        let initial = String(domain.replacingOccurrences(of: "www.", with: "").prefix(1)).uppercased()
+        // Couleur déterministe basée sur le hash du domaine
+        let hue = Double(abs(domain.hashValue) % 360) / 360.0
+
+        return Text(initial)
+            .font(.system(.caption, design: .rounded, weight: .bold))
+            .foregroundStyle(.white)
+            .frame(width: 28, height: 28)
+            .background(
+                Circle()
+                    .fill(Color(hue: hue, saturation: 0.5, brightness: 0.7))
+            )
+    }
+
+    // MARK: - Action Badge
+
+    @ViewBuilder
+    private var actionBadge: some View {
+        if article.summary != nil {
+            // Résumé disponible — indicateur compact
+            Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle")
+                .font(.callout)
+                .foregroundStyle(isExpanded ? Color.accentColor : Color.gray.opacity(0.4))
+        } else if article.extractedText == nil {
+            // Extraction échouée
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.caption)
+                .foregroundStyle(.orange)
+                .help("Contenu non extrait")
+        } else if isSummarizing {
+            ProgressView()
+                .controlSize(.small)
+        } else {
+            // Bouton résumer
+            Button { summarizeArticle() } label: {
+                HStack(spacing: 3) {
+                    Image(systemName: "sparkles")
+                        .font(.caption2)
+                    Text("Résumer")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.purple.opacity(0.12))
+                .foregroundStyle(.purple)
+                .clipShape(Capsule())
             }
+            .buttonStyle(.plain)
         }
     }
 
-    // MARK: - Résumé expandé
+    // MARK: - Expanded Summary
 
     private func expandedSummary(_ summary: Summary) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            // TL;DR
+        VStack(alignment: .leading, spacing: 10) {
+            // TL;DR dans un encadré
             Text(summary.tldr)
-                .font(.caption)
+                .font(.callout)
                 .foregroundStyle(.primary)
-                .padding(8)
+                .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color.accentColor.opacity(0.06))
-                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.accentColor.opacity(0.06))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.accentColor.opacity(0.1), lineWidth: 1)
+                        )
+                )
 
             // Points clés
             if !summary.keyPoints.isEmpty {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 6) {
                     ForEach(summary.keyPoints, id: \.self) { point in
-                        HStack(alignment: .top, spacing: 6) {
+                        HStack(alignment: .top, spacing: 8) {
                             Circle()
-                                .fill(.secondary)
-                                .frame(width: 4, height: 4)
-                                .padding(.top, 5)
+                                .fill(Color.accentColor.opacity(0.4))
+                                .frame(width: 5, height: 5)
+                                .padding(.top, 6)
                             Text(point)
-                                .font(.caption2)
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -487,12 +587,13 @@ struct ArticleRow: View {
 
             // Tags
             if !summary.tags.isEmpty {
-                HStack(spacing: 4) {
+                HStack(spacing: 5) {
                     ForEach(summary.tags, id: \.self) { tag in
                         Text("#\(tag)")
                             .font(.system(.caption2, design: .rounded))
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
+                            .fontWeight(.medium)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 3)
                             .background(Color.purple.opacity(0.1))
                             .foregroundStyle(.purple)
                             .clipShape(Capsule())
@@ -500,15 +601,14 @@ struct ArticleRow: View {
                 }
             }
         }
-        .padding(.top, 4)
-        .transition(.opacity.combined(with: .move(edge: .top)))
+        .transition(.opacity.combined(with: .scale(scale: 0.98, anchor: .top)))
     }
 
     // MARK: - Helpers
 
-    /// Extrait le domaine de l'URL pour affichage compact
     private var displayURL: String {
-        URL(string: article.url)?.host ?? article.url
+        guard let host = URL(string: article.url)?.host else { return article.url }
+        return host.replacingOccurrences(of: "www.", with: "")
     }
 
     private func summarizeArticle() {
@@ -522,7 +622,7 @@ struct ArticleRow: View {
                 let summary = try await provider.summarize(text: text, language: summaryLanguage)
                 article.summary = summary
                 article.isRead = true
-                withAnimation { isExpanded = true }
+                withAnimation(.easeInOut(duration: 0.25)) { isExpanded = true }
             } catch {
                 summaryError = error.localizedDescription
             }
