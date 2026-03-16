@@ -16,6 +16,7 @@
 		4663E905DB6960837E3674A0 /* OpenAIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC36821333C82C01F5958318 /* OpenAIProvider.swift */; };
 		60719C63BA2FE3FD2E34B099 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97DF7B2310A1DE4002E65E55 /* ContentView.swift */; };
 		8183A7B471C7BE041928A9D3 /* ClaudeProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7DEFFDDE34EAA7782C8C1F0 /* ClaudeProvider.swift */; };
+		86B2C6382884529A2323A047 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E320462D625CB0AF7950A6AC /* HelpView.swift */; };
 		89104B50CF19488EB0266CD1 /* OllamaProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAFCC422BF145E10D0EE682 /* OllamaProvider.swift */; };
 		8928758915FF880B86F952C6 /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8E96925B1649BFE44E17BD0 /* Article.swift */; };
 		8CF863C17BFEF027D5EA2CD1 /* SafariImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E5D6E71F81F14F521057B46 /* SafariImporter.swift */; };
@@ -23,6 +24,7 @@
 		A388BD95209EDB3020863CEF /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = C7089482B4815FA9342B24A4 /* SwiftSoup */; };
 		BB116950F677EA6C65BE1EF2 /* ArticleExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 057F06B1786D2750330FC7A9 /* ArticleExtractor.swift */; };
 		BFA813622119BCFE03748FD2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 82FF68BF6EC82622F9A5A61D /* Assets.xcassets */; };
+		D12EB5246FDBCD6FD012EC91 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D3F7CBB2BF0A57C5EB9F44 /* OnboardingView.swift */; };
 		DB34F14B71E26EECA7098961 /* SKILL.md in Resources */ = {isa = PBXBuildFile; fileRef = 5E9854D42EB7398F1D980540 /* SKILL.md */; };
 		E908CA342C24A9724AFB6D34 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8343AF51293590EE82248F85 /* PreferencesView.swift */; };
 		EAA7F5FEDB27E51A6CFA077D /* SafariImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BD323786370BFFF38E3064 /* SafariImportView.swift */; };
@@ -34,6 +36,7 @@
 		0E5D6E71F81F14F521057B46 /* SafariImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariImporter.swift; sourceTree = "<group>"; };
 		2376B018000266E58EA4A4A5 /* GlobalShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalShortcut.swift; sourceTree = "<group>"; };
 		403885EEC600242FB23839A8 /* LLMProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMProvider.swift; sourceTree = "<group>"; };
+		45D3F7CBB2BF0A57C5EB9F44 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		5E9854D42EB7398F1D980540 /* SKILL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SKILL.md; sourceTree = "<group>"; };
 		6823D1F58D1D26790E95463B /* ReadLaterAI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ReadLaterAI.entitlements; sourceTree = "<group>"; };
 		6D5F1F939933D3F51C869327 /* CLAUDE.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CLAUDE.md; sourceTree = "<group>"; };
@@ -48,6 +51,7 @@
 		BA9A92BC68EB58F46896EEBD /* ReadLaterAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadLaterAIApp.swift; sourceTree = "<group>"; };
 		C622F4CDFEFD48F18B66D00A /* ExportMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportMenuView.swift; sourceTree = "<group>"; };
 		D7BD323786370BFFF38E3064 /* SafariImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariImportView.swift; sourceTree = "<group>"; };
+		E320462D625CB0AF7950A6AC /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
 		F3ADFA44FD4775D156C5929F /* ReadLaterAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadLaterAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAAFCC422BF145E10D0EE682 /* OllamaProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OllamaProvider.swift; sourceTree = "<group>"; };
 		FC36821333C82C01F5958318 /* OpenAIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIProvider.swift; sourceTree = "<group>"; };
@@ -106,6 +110,8 @@
 			children = (
 				97DF7B2310A1DE4002E65E55 /* ContentView.swift */,
 				C622F4CDFEFD48F18B66D00A /* ExportMenuView.swift */,
+				E320462D625CB0AF7950A6AC /* HelpView.swift */,
+				45D3F7CBB2BF0A57C5EB9F44 /* OnboardingView.swift */,
 				8343AF51293590EE82248F85 /* PreferencesView.swift */,
 				D7BD323786370BFFF38E3064 /* SafariImportView.swift */,
 			);
@@ -246,9 +252,11 @@
 				3F059BCF959123F373772283 /* ExportMenuView.swift in Sources */,
 				0F651BCC268A3CA6DD572E1C /* ExportService.swift in Sources */,
 				36258301286B4702F2CD93DA /* GlobalShortcut.swift in Sources */,
+				86B2C6382884529A2323A047 /* HelpView.swift in Sources */,
 				07CBB519402E8D850D6A02AE /* KeychainService.swift in Sources */,
 				F5B9F2F3AB7EE0D16F1C41E4 /* LLMProvider.swift in Sources */,
 				89104B50CF19488EB0266CD1 /* OllamaProvider.swift in Sources */,
+				D12EB5246FDBCD6FD012EC91 /* OnboardingView.swift in Sources */,
 				4663E905DB6960837E3674A0 /* OpenAIProvider.swift in Sources */,
 				E908CA342C24A9724AFB6D34 /* PreferencesView.swift in Sources */,
 				12088E73B25800DA316DF52D /* ReadLaterAIApp.swift in Sources */,

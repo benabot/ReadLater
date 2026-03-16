@@ -11,6 +11,8 @@ struct ContentView: View {
         case articles
         case safariImport(URL)
         case preferences
+        case onboarding
+        case help
     }
 
     @Environment(\.modelContext) private var modelContext
@@ -24,6 +26,10 @@ struct ContentView: View {
     @State private var extractor = ArticleExtractor()
     @State private var clipboardMonitor = ClipboardMonitor()
     @State private var viewMode: ViewMode = .articles
+
+    // Premier lancement — afficher l'onboarding une seule fois.
+    // @AppStorage persiste la valeur dans UserDefaults.
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
 
     var onQuit: (() -> Void)?
 
@@ -41,10 +47,27 @@ struct ContentView: View {
                 PreferencesView(
                     onDismiss: { withAnimation { viewMode = .articles } }
                 )
+            case .onboarding:
+                OnboardingView(
+                    onDismiss: {
+                        hasSeenOnboarding = true
+                        withAnimation { viewMode = .articles }
+                    }
+                )
+            case .help:
+                HelpView(
+                    onDismiss: { withAnimation { viewMode = .articles } }
+                )
             }
         }
         .frame(width: 380, height: 520)
         .task { clipboardMonitor.start() }
+        .onAppear {
+            // Afficher l'onboarding au tout premier lancement
+            if !hasSeenOnboarding {
+                viewMode = .onboarding
+            }
+        }
     }
 
     // MARK: - Articles View
@@ -223,8 +246,14 @@ struct ContentView: View {
 
             Spacer()
 
-            FooterButton(icon: "power", label: nil) {
-                onQuit?()
+            HStack(spacing: 2) {
+                FooterButton(icon: "questionmark.circle", label: nil) {
+                    withAnimation { viewMode = .help }
+                }
+
+                FooterButton(icon: "power", label: nil) {
+                    onQuit?()
+                }
             }
         }
         .padding(.horizontal, 10)
