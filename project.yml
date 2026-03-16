@@ -1,0 +1,49 @@
+name: ReadLaterAI
+options:
+  bundleIdPrefix: fr.beabot
+  deploymentTarget:
+    macOS: "14.0"
+  xcodeVersion: "16.3"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+packages:
+  SwiftSoup:
+    url: https://github.com/scinfu/SwiftSoup
+    from: "2.7.0"
+
+targets:
+  ReadLaterAI:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+
+    sources:
+      - path: ReadLaterAI
+        excludes:
+          - Resources/Assets.xcassets/AppIcon.appiconset
+          - "**/.DS_Store"
+
+    resources:
+      - path: ReadLaterAI/Resources/Assets.xcassets
+
+    dependencies:
+      - package: SwiftSoup
+
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: fr.beabot.ReadLaterAI
+        PRODUCT_NAME: ReadLater AI
+        INFOPLIST_KEY_LSUIElement: true
+        INFOPLIST_KEY_CFBundleDisplayName: "ReadLater AI"
+        GENERATE_INFOPLIST_FILE: true
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: "0.1.0"
+        CODE_SIGN_ENTITLEMENTS: ReadLaterAI/Resources/ReadLaterAI.entitlements
+        SWIFT_STRICT_CONCURRENCY: complete
+        ENABLE_APP_SANDBOX: true
+        SWIFT_VERSION: "6.0"
