@@ -25,9 +25,9 @@ struct PreferencesView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            Divider()
+            GlassDivider()
             tabBar
-            Divider()
+            GlassDivider()
 
             // Contenu selon l'onglet — PAS dans un switch à l'intérieur d'un ScrollView
             // (le switch dans ScrollView peut causer des problèmes de navigation).
@@ -72,7 +72,7 @@ struct PreferencesView: View {
     // MARK: - Tab Bar
 
     private var tabBar: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 4) {
             ForEach(Tab.allCases, id: \.self) { tab in
                 Button {
                     selectedTab = tab
@@ -84,13 +84,20 @@ struct PreferencesView: View {
                             .font(.callout)
                             .fontWeight(selectedTab == tab ? .semibold : .regular)
                     }
-                    .padding(.horizontal, 14)
+                    .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                     .frame(maxWidth: .infinity)
                     .background(
-                        selectedTab == tab
-                            ? Color.accentColor.opacity(0.12)
-                            : Color.clear
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(selectedTab == tab
+                                  ? Color.accentColor.opacity(0.12)
+                                  : Color.clear)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(selectedTab == tab
+                                            ? Color.accentColor.opacity(0.2)
+                                            : Color.clear, lineWidth: 0.5)
+                            )
                     )
                     .foregroundStyle(selectedTab == tab ? .primary : .secondary)
                     .contentShape(Rectangle())
@@ -98,8 +105,8 @@ struct PreferencesView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
     }
 
     // MARK: - Status Bar

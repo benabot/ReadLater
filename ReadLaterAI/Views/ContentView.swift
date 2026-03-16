@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
-// MARK: - ContentView
+// MARK: - ContentView — Liquid Glass Design
 
 struct ContentView: View {
 
@@ -15,23 +15,16 @@ struct ContentView: View {
 
         static func == (lhs: ViewMode, rhs: ViewMode) -> Bool {
             switch (lhs, rhs) {
-            case (.articles, .articles),
-                 (.preferences, .preferences),
-                 (.onboarding, .onboarding),
-                 (.help, .help):
-                return true
-            case (.safariImport(let a), .safariImport(let b)):
-                return a == b
-            default:
-                return false
+            case (.articles, .articles), (.preferences, .preferences),
+                 (.onboarding, .onboarding), (.help, .help): true
+            case (.safariImport(let a), .safariImport(let b)): a == b
+            default: false
             }
         }
     }
 
     @Environment(\.modelContext) private var modelContext
-
-    @Query(sort: \Article.dateAdded, order: .reverse)
-    private var articles: [Article]
+    @Query(sort: \Article.dateAdded, order: .reverse) private var articles: [Article]
 
     @State private var urlInput: String = ""
     @State private var isLoading: Bool = false
@@ -45,41 +38,39 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
+            // Fond glass global
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
+
             switch viewMode {
             case .articles:
-                articlesView
-                    .transition(.opacity)
+                articlesView.transition(.opacity)
             case .safariImport(let url):
                 SafariImportView(
                     bookmarksFileURL: url,
                     onDismiss: { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .articles } }
-                )
-                .transition(.move(edge: .trailing).combined(with: .opacity))
+                ).transition(.move(edge: .trailing).combined(with: .opacity))
             case .preferences:
                 PreferencesView(
                     onDismiss: { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .articles } }
-                )
-                .transition(.move(edge: .trailing).combined(with: .opacity))
+                ).transition(.move(edge: .trailing).combined(with: .opacity))
             case .onboarding:
                 OnboardingView(
                     onDismiss: {
                         hasSeenOnboarding = true
                         withAnimation(.easeInOut(duration: 0.3)) { viewMode = .articles }
                     }
-                )
-                .transition(.opacity)
+                ).transition(.opacity)
             case .help:
                 HelpView(
                     onDismiss: { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .articles } }
-                )
-                .transition(.move(edge: .trailing).combined(with: .opacity))
+                ).transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
         .frame(width: 400, height: 540)
         .task { clipboardMonitor.start() }
-        .onAppear {
-            if !hasSeenOnboarding { viewMode = .onboarding }
-        }
+        .onAppear { if !hasSeenOnboarding { viewMode = .onboarding } }
     }
 
     // MARK: - Articles View
@@ -87,25 +78,24 @@ struct ContentView: View {
     private var articlesView: some View {
         VStack(spacing: 0) {
             headerSection
-            
+
             if let detected = clipboardMonitor.detectedURL {
                 clipboardBanner(url: detected)
             }
 
             articleListSection
-
             footerSection
         }
     }
 
-    // MARK: - Header
+    // MARK: - Header (glass search bar)
 
     private var headerSection: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 8) {
             HStack(spacing: 10) {
-                Image(systemName: "link.badge.plus")
+                Image(systemName: "magnifyingglass")
                     .font(.callout)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.tertiary)
 
                 TextField("Coller ou saisir une URL…", text: $urlInput)
                     .textFieldStyle(.plain)
@@ -117,7 +107,7 @@ struct ContentView: View {
                         .controlSize(.small)
                 } else {
                     Button { addArticle() } label: {
-                        Image(systemName: "arrow.right.circle.fill")
+                        Image(systemName: "plus.circle.fill")
                             .font(.title2)
                     }
                     .buttonStyle(.plain)
@@ -125,8 +115,16 @@ struct ContentView: View {
                     .disabled(urlInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.primary.opacity(0.04))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+                    )
+            )
 
             if let errorMessage {
                 HStack(spacing: 4) {
@@ -136,70 +134,60 @@ struct ContentView: View {
                         .font(.caption)
                 }
                 .foregroundStyle(.red)
-                .padding(.horizontal, 14)
-                .padding(.bottom, 8)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
-
-            Divider()
         }
+        .padding(.horizontal, 12)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
     }
 
     // MARK: - Clipboard Banner
 
     private func clipboardBanner(url: String) -> some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                Image(systemName: "doc.on.clipboard.fill")
-                    .font(.callout)
+        HStack(spacing: 10) {
+            Image(systemName: "doc.on.clipboard.fill")
+                .font(.callout)
+                .foregroundStyle(.blue)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text("URL détectée")
+                    .font(.caption2)
+                    .fontWeight(.medium)
                     .foregroundStyle(.blue)
-
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("URL détectée")
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.blue)
-                    Text(url)
-                        .font(.caption)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Button {
-                    urlInput = url
-                    clipboardMonitor.clearDetectedURL()
-                    addArticle()
-                } label: {
-                    Text("Ajouter")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(Color.blue)
-                        .foregroundStyle(.white)
-                        .clipShape(Capsule())
-                }
-                .buttonStyle(.plain)
-
-                Button {
-                    withAnimation { clipboardMonitor.clearDetectedURL() }
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.callout)
-                        .foregroundStyle(.tertiary)
-                }
-                .buttonStyle(.plain)
+                Text(url)
+                    .font(.caption)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                    .foregroundStyle(.secondary)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(Color.blue.opacity(0.06))
 
-            Divider()
+            Spacer()
+
+            Button {
+                urlInput = url
+                clipboardMonitor.clearDetectedURL()
+                addArticle()
+            } label: {
+                Text("Ajouter")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+            .buttonStyle(GlassButtonStyle(color: .blue))
+
+            Button {
+                withAnimation { clipboardMonitor.clearDetectedURL() }
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.callout)
+                    .foregroundStyle(.tertiary)
+            }
+            .buttonStyle(.plain)
         }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(Color.blue.opacity(0.05))
         .transition(.move(edge: .top).combined(with: .opacity))
     }
 
@@ -211,11 +199,12 @@ struct ContentView: View {
                 emptyState
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 1) {
+                    LazyVStack(spacing: 4) {
                         ForEach(articles) { article in
                             ArticleRow(article: article)
                         }
                     }
+                    .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                 }
             }
@@ -226,88 +215,76 @@ struct ContentView: View {
     // MARK: - Empty State
 
     private var emptyState: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             Spacer()
 
-            // Icône stylisée
             ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.accentColor.opacity(0.08))
-                    .frame(width: 72, height: 72)
-
+                Circle()
+                    .fill(Color.accentColor.opacity(0.06))
+                    .frame(width: 80, height: 80)
                 Image(systemName: "text.page.badge.magnifyingglass")
-                    .font(.system(size: 30))
-                    .foregroundStyle(Color.accentColor.opacity(0.5))
+                    .font(.system(size: 32))
+                    .foregroundStyle(Color.accentColor.opacity(0.4))
             }
 
             VStack(spacing: 6) {
                 Text("Prêt à lire plus tard")
                     .font(.headline)
-                    .foregroundStyle(.primary)
-
                 Text("Collez une URL ci-dessus ou importez\nvos articles depuis Safari")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
 
-            // Raccourci visuel
-            HStack(spacing: 16) {
-                emptyStateHint(icon: "link", text: "Coller une URL")
-                emptyStateHint(icon: "safari", text: "Import Safari")
-                emptyStateHint(icon: "doc.on.clipboard", text: "Auto-détection")
+            HStack(spacing: 20) {
+                emptyHint(icon: "link", text: "URL")
+                emptyHint(icon: "safari", text: "Safari")
+                emptyHint(icon: "doc.on.clipboard", text: "Clipboard")
             }
-            .padding(.top, 4)
 
             Spacer()
         }
-        .padding(.horizontal, 20)
     }
 
-    private func emptyStateHint(icon: String, text: String) -> some View {
+    private func emptyHint(icon: String, text: String) -> some View {
         VStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.callout)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(.quaternary)
             Text(text)
                 .font(.caption2)
                 .foregroundStyle(.quaternary)
         }
     }
 
-    // MARK: - Footer
+    // MARK: - Footer (glass bar)
 
     private var footerSection: some View {
-        VStack(spacing: 0) {
-            Divider()
-            HStack(spacing: 0) {
-                FooterButton(icon: "gearshape", tooltip: "Préférences") {
-                    withAnimation(.easeInOut(duration: 0.2)) { viewMode = .preferences }
-                }
-                FooterButton(icon: "safari", tooltip: "Import Safari") {
-                    openSafariBookmarks()
-                }
-
-                Spacer()
-
-                if !articles.isEmpty {
-                    Text("\(articles.count) article\(articles.count > 1 ? "s" : "")")
-                        .font(.caption)
-                        .foregroundStyle(.quaternary)
-                }
-
-                Spacer()
-
-                FooterButton(icon: "questionmark.circle", tooltip: "Aide") {
-                    withAnimation(.easeInOut(duration: 0.2)) { viewMode = .help }
-                }
-                FooterButton(icon: "power", tooltip: "Quitter") {
-                    onQuit?()
-                }
+        HStack(spacing: 0) {
+            GlassFooterButton(icon: "gearshape") {
+                withAnimation(.easeInOut(duration: 0.2)) { viewMode = .preferences }
             }
-            .padding(.horizontal, 6)
-            .padding(.vertical, 4)
+            GlassFooterButton(icon: "safari") { openSafariBookmarks() }
+
+            Spacer()
+
+            if !articles.isEmpty {
+                Text("\(articles.count)")
+                    .font(.system(.caption, design: .rounded, weight: .medium))
+                    .foregroundStyle(.tertiary)
+                    .glassPill(color: .gray)
+            }
+
+            Spacer()
+
+            GlassFooterButton(icon: "questionmark.circle") {
+                withAnimation(.easeInOut(duration: 0.2)) { viewMode = .help }
+            }
+            GlassFooterButton(icon: "power") { onQuit?() }
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Color.primary.opacity(0.02))
     }
 
     // MARK: - Actions
@@ -323,7 +300,6 @@ struct ContentView: View {
         panel.directoryURL = URL(fileURLWithPath: "/Users/" + NSUserName() + "/Library/Safari")
         panel.nameFieldStringValue = "Bookmarks.plist"
         NSApp.activate(ignoringOtherApps: true)
-
         let response = panel.runModal()
         if response == .OK, let url = panel.url {
             withAnimation(.easeInOut(duration: 0.2)) { viewMode = .safariImport(url) }
@@ -332,19 +308,16 @@ struct ContentView: View {
 
     private func addArticle() {
         let trimmed = urlInput.trimmingCharacters(in: .whitespacesAndNewlines)
-
         guard let url = URL(string: trimmed),
               let scheme = url.scheme,
               ["http", "https"].contains(scheme.lowercased()) else {
             withAnimation { errorMessage = ArticleError.invalidURL.localizedDescription }
             return
         }
-
         if articles.contains(where: { $0.url == trimmed }) {
             withAnimation { errorMessage = "Cette URL est déjà dans votre liste" }
             return
         }
-
         clipboardMonitor.markAsSeen(trimmed)
         Task { await performExtraction(url: url, rawURL: trimmed) }
     }
@@ -356,7 +329,6 @@ struct ContentView: View {
         let article = Article(url: rawURL)
         modelContext.insert(article)
         withAnimation { urlInput = "" }
-
         do {
             let result = try await extractor.extract(from: url)
             article.title = result.title
@@ -367,19 +339,13 @@ struct ContentView: View {
         }
         withAnimation { isLoading = false }
     }
-
-    private func deleteArticles(at offsets: IndexSet) {
-        for index in offsets { modelContext.delete(articles[index]) }
-    }
 }
 
-// MARK: - Footer Button
+// MARK: - Glass Footer Button
 
-struct FooterButton: View {
+struct GlassFooterButton: View {
     let icon: String
-    let tooltip: String
     let action: () -> Void
-
     @State private var isHovered = false
 
     var body: some View {
@@ -388,21 +354,22 @@ struct FooterButton: View {
                 .font(.callout)
                 .padding(8)
                 .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(isHovered ? Color.primary.opacity(0.06) : Color.clear)
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(isHovered ? Color.primary.opacity(0.08) : Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(isHovered ? Color.primary.opacity(0.1) : Color.clear, lineWidth: 0.5)
+                        )
                 )
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .foregroundStyle(isHovered ? .primary : .secondary)
-        .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.15)) { isHovered = hovering }
-        }
-        .help(tooltip)
+        .onHover { h in withAnimation(.easeInOut(duration: 0.12)) { isHovered = h } }
     }
 }
 
-// MARK: - Article Row
+// MARK: - Article Row (glass card)
 
 struct ArticleRow: View {
     let article: Article
@@ -416,68 +383,66 @@ struct ArticleRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // Header row
             HStack(alignment: .top, spacing: 10) {
-                // Initiale du domaine — identité visuelle de la source
                 siteInitial
 
-                VStack(alignment: .leading, spacing: 4) {
-                    // Titre
+                VStack(alignment: .leading, spacing: 3) {
                     Text(article.title)
                         .font(.system(.body, weight: .medium))
                         .lineLimit(isExpanded ? 4 : 2)
-                        .foregroundStyle(.primary)
 
-                    // Domaine
                     Text(displayURL)
                         .font(.caption)
                         .foregroundStyle(.tertiary)
 
-                    // Métadonnées
                     HStack(spacing: 5) {
                         Text(article.dateAdded, format: .dateTime.day().month(.abbreviated))
-                            .foregroundStyle(.quaternary)
-
                         if article.wordCount > 0 {
-                            Text("·").foregroundStyle(.quaternary)
-                            Text("\(article.wordCount) mots").foregroundStyle(.quaternary)
+                            Text("·")
+                            Text("\(article.wordCount) mots")
                         }
-
-                        if let summary = article.summary {
-                            Text("·").foregroundStyle(.quaternary)
-                            Text("~\(summary.readingTime) min").foregroundStyle(.quaternary)
+                        if let s = article.summary {
+                            Text("·")
+                            Text("~\(s.readingTime) min")
                         }
                     }
                     .font(.caption2)
+                    .foregroundStyle(.quaternary)
                 }
 
                 Spacer(minLength: 4)
-
-                // Action badge
                 actionBadge
             }
 
             // Résumé expandé
             if let summary = article.summary, isExpanded {
                 expandedSummary(summary)
-                    .padding(.leading, 42) // Aligné avec le contenu (après l'initiale)
-                    .padding(.top, 8)
+                    .padding(.leading, 38)
+                    .padding(.top, 10)
             }
 
-            // Erreur
             if let error = summaryError {
                 Text(error)
                     .font(.caption2)
                     .foregroundStyle(.red)
-                    .lineLimit(2)
-                    .padding(.leading, 42)
+                    .padding(.leading, 38)
                     .padding(.top, 4)
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 10)
+        .padding(10)
         .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(isHovered ? Color.primary.opacity(0.03) : Color.clear)
+            RoundedRectangle(cornerRadius: 10)
+                .fill(isHovered ? Color.primary.opacity(0.04) : Color.primary.opacity(0.02))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(
+                            isHovered
+                                ? Color.primary.opacity(0.1)
+                                : Color.primary.opacity(0.04),
+                            lineWidth: 0.5
+                        )
+                )
         )
         .contentShape(Rectangle())
         .onTapGesture {
@@ -485,20 +450,15 @@ struct ArticleRow: View {
                 withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
             }
         }
-        .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.12)) { isHovered = hovering }
-        }
+        .onHover { h in withAnimation(.easeInOut(duration: 0.12)) { isHovered = h } }
         .contextMenu { ExportMenuView(article: article) }
     }
 
-    // MARK: - Site Initial
+    // MARK: - Site Initial (avatar coloré par domaine)
 
-    /// Affiche la première lettre du domaine dans un cercle coloré.
-    /// Donne une identité visuelle à chaque source (comme les avatars dans Mail).
     private var siteInitial: some View {
         let domain = URL(string: article.url)?.host ?? "?"
         let initial = String(domain.replacingOccurrences(of: "www.", with: "").prefix(1)).uppercased()
-        // Couleur déterministe basée sur le hash du domaine
         let hue = Double(abs(domain.hashValue) % 360) / 360.0
 
         return Text(initial)
@@ -507,7 +467,17 @@ struct ArticleRow: View {
             .frame(width: 28, height: 28)
             .background(
                 Circle()
-                    .fill(Color(hue: hue, saturation: 0.5, brightness: 0.7))
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(hue: hue, saturation: 0.5, brightness: 0.8),
+                                Color(hue: hue, saturation: 0.6, brightness: 0.6)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .shadow(color: Color(hue: hue, saturation: 0.4, brightness: 0.5).opacity(0.3), radius: 4, y: 2)
             )
     }
 
@@ -516,21 +486,16 @@ struct ArticleRow: View {
     @ViewBuilder
     private var actionBadge: some View {
         if article.summary != nil {
-            // Résumé disponible — indicateur compact
             Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle")
                 .font(.callout)
-                .foregroundStyle(isExpanded ? Color.accentColor : Color.gray.opacity(0.4))
+                .foregroundStyle(isExpanded ? Color.accentColor : Color.gray.opacity(0.3))
         } else if article.extractedText == nil {
-            // Extraction échouée
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.caption)
                 .foregroundStyle(.orange)
-                .help("Contenu non extrait")
         } else if isSummarizing {
-            ProgressView()
-                .controlSize(.small)
+            ProgressView().controlSize(.small)
         } else {
-            // Bouton résumer
             Button { summarizeArticle() } label: {
                 HStack(spacing: 3) {
                     Image(systemName: "sparkles")
@@ -539,34 +504,19 @@ struct ArticleRow: View {
                         .font(.caption2)
                         .fontWeight(.medium)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color.purple.opacity(0.12))
-                .foregroundStyle(.purple)
-                .clipShape(Capsule())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(GlassButtonStyle(color: .purple))
         }
     }
 
-    // MARK: - Expanded Summary
+    // MARK: - Expanded Summary (glass cards)
 
     private func expandedSummary(_ summary: Summary) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            // TL;DR dans un encadré
+            // TL;DR dans un encadré glass
             Text(summary.tldr)
                 .font(.callout)
-                .foregroundStyle(.primary)
-                .padding(10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.accentColor.opacity(0.06))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.accentColor.opacity(0.1), lineWidth: 1)
-                        )
-                )
+                .glassCard(cornerRadius: 8, padding: 10)
 
             // Points clés
             if !summary.keyPoints.isEmpty {
@@ -585,18 +535,14 @@ struct ArticleRow: View {
                 }
             }
 
-            // Tags
+            // Tags en pills glass
             if !summary.tags.isEmpty {
                 HStack(spacing: 5) {
                     ForEach(summary.tags, id: \.self) { tag in
                         Text("#\(tag)")
-                            .font(.system(.caption2, design: .rounded))
-                            .fontWeight(.medium)
-                            .padding(.horizontal, 7)
-                            .padding(.vertical, 3)
-                            .background(Color.purple.opacity(0.1))
+                            .font(.system(.caption2, design: .rounded, weight: .medium))
+                            .glassPill(color: .purple)
                             .foregroundStyle(.purple)
-                            .clipShape(Capsule())
                     }
                 }
             }
@@ -615,7 +561,6 @@ struct ArticleRow: View {
         guard let text = article.extractedText else { return }
         isSummarizing = true
         summaryError = nil
-
         Task {
             do {
                 let provider: any LLMProvider = resolveProvider()
@@ -623,9 +568,7 @@ struct ArticleRow: View {
                 article.summary = summary
                 article.isRead = true
                 withAnimation(.easeInOut(duration: 0.25)) { isExpanded = true }
-            } catch {
-                summaryError = error.localizedDescription
-            }
+            } catch { summaryError = error.localizedDescription }
             isSummarizing = false
         }
     }
