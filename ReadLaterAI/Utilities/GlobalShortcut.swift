@@ -3,20 +3,16 @@ import SwiftUI
 import Carbon.HIToolbox
 
 // MARK: - ShortcutKey
-// Représente un raccourci clavier personnalisable, stocké dans UserDefaults.
-// On sérialise le keyCode + les modifiers comme deux entiers.
 
 struct ShortcutKey: Codable, Equatable, Sendable {
     let keyCode: UInt16
-    let modifiers: UInt  // NSEvent.ModifierFlags.rawValue
+    let modifiers: UInt
 
-    /// Le raccourci par défaut : ⌥⌘R
     static let defaultShortcut = ShortcutKey(
         keyCode: UInt16(kVK_ANSI_R),
         modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue
     )
 
-    /// Affichage lisible du raccourci (ex: "⌥⌘R")
     var displayString: String {
         var parts: [String] = []
         let flags = NSEvent.ModifierFlags(rawValue: modifiers)
@@ -28,10 +24,7 @@ struct ShortcutKey: Codable, Equatable, Sendable {
         return parts.joined()
     }
 
-    /// Nom lisible de la touche
     private var keyName: String {
-        // Mapper les keyCodes courants vers des noms lisibles.
-        // Les keyCodes sont hérités de l'API Carbon (layout QWERTY).
         switch Int(keyCode) {
         case kVK_ANSI_A: "A"
         case kVK_ANSI_B: "B"
@@ -85,18 +78,8 @@ struct ShortcutKey: Codable, Equatable, Sendable {
     }
 }
 
-// MARK: - ShortcutRecorderView
-// Vue SwiftUI qui permet d'enregistrer un nouveau raccourci clavier.
-// L'utilisateur clique sur le champ, puis appuie sur la combinaison souhaitée.
-// C'est comme les "hotkey recorders" dans Alfred, Raycast, etc.
-
 // MARK: - ShortcutRecordingState
-// Flag global partagé entre le ShortcutRecorderView et l'AppDelegate.
-// Quand isRecording = true, l'AppDelegate ignore les raccourcis clavier
-// pour ne pas interférer avec l'enregistrement d'un nouveau raccourci.
-//
-// @MainActor car il est lu/écrit uniquement depuis le main thread (UI).
-// C'est l'équivalent d'une variable globale réactive en Vue (un petit store).
+// Flag global pour que l'AppDelegate sache quand ignorer les raccourcis.
 
 @MainActor
 final class ShortcutRecordingState {
@@ -105,39 +88,124 @@ final class ShortcutRecordingState {
     private init() {}
 }
 
+// MARK: - KeyCaptureView (NSViewRepresentable)
+// Une NSView custom qui capture les keyDown quand elle a le focus.
+// Contrairement aux NSEvent monitors (qui interceptent TOUS les événements
+// de l'app), cette NSView ne capture que les touches quand elle est "first
+// responder" (= quand elle a le focus clavier).
+//
+// C'est l'approche la plus propre car :
+// 1. Pas de conflit avec les monitors de l'AppDelegate
+// 2. L'événement est consommé par la vue avant d'arriver aux monitors
+// 3. Pas besoin de flag de synchronisation complexe
+//
+// NSViewRepresentable est le pont pour utiliser une NSView AppKit dans SwiftUI.
+// C'est comme un wrapper de composant natif (Web Component en JS).
+
+struct KeyCaptureView: NSViewRepresentable {
+    var onKeyDown: (UInt16, NSEvent.ModifierFlags) -> Void
+
+    func makeNSView(context: Context) -> KeyCaptureNSView {
+        let view = KeyCaptureNSView()
+        view.onKeyDown = onKeyDown
+        return view
+    }
+
+    func updateNSView(_ nsView: KeyCaptureNSView, context: Context) {
+        nsView.onKeyDown = onKeyDown
+    }
+
+    // La NSView custom qui devient first responder et capte les touches.
+    class KeyCaptureNSView: NSView {
+        var onKeyDown: ((UInt16, NSEvent.ModifierFlags) -> Void)?
+
+        // acceptsFirstResponder = cette vue PEUT recevoir le focus clavier.
+        // Par défaut, les NSView ne l'acceptent pas.
+        override var acceptsFirstResponder: Bool { true }
+
+        // Quand la vue apparaît, on prend le focus automatiquement.
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            window?.makeFirstResponder(self)
+        }
+
+        // Intercepte les touches et les passe au callback.
+        // L'événement est "consommé" ici — il ne remonte PAS aux monitors.
+        override func keyDown(with event: NSEvent) {
+            let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+
+            // Ignorer les touches modificateurs seules (Cmd, Alt, etc. sans lettre)
+            let modOnlyKeys: Set<UInt16> = [54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
+            guard !modOnlyKeys.contains(event.keyCode) else { return }
+
+            // Ignorer les touches sans modificateur (sauf F-keys)
+            let isFKey = (kVK_F1...kVK_F8).contains(Int(event.keyCode))
+            guard !modifiers.isEmpty || isFKey else { return }
+
+            onKeyDown?(event.keyCode, modifiers)
+        }
+    }
+}
+
+// MARK: - ShortcutRecorderView
+
 struct ShortcutRecorderView: View {
     @Binding var shortcut: ShortcutKey
     @State private var isRecording = false
-    @State private var monitor: Any?
 
     var body: some View {
         HStack(spacing: 8) {
-            // Zone d'affichage / enregistrement du raccourci
-            Text(isRecording ? String(localized: "Press a shortcut…") : shortcut.displayString)
-                .font(.system(.body, design: .monospaced))
-                .foregroundStyle(isRecording ? .orange : .primary)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .frame(minWidth: 120)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(isRecording ? Color.orange.opacity(0.1) : Color.primary.opacity(0.05))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(isRecording ? Color.orange : Color.primary.opacity(0.2), lineWidth: 1)
-                )
-                .onTapGesture {
-                    startRecording()
+            if isRecording {
+                // Mode enregistrement : affiche la NSView de capture
+                ZStack {
+                    // La KeyCaptureView invisible qui capture les touches
+                    KeyCaptureView { keyCode, modifiers in
+                        shortcut = ShortcutKey(keyCode: keyCode, modifiers: modifiers.rawValue)
+                        stopRecording()
+                    }
+                    .frame(width: 0, height: 0)
+                    .opacity(0)
+
+                    Text("Press a shortcut…")
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundStyle(.orange)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 5)
+                        .frame(minWidth: 120)
+                        .background(
+                            RoundedRectangle(cornerRadius: 6)
+                                .fill(Color.orange.opacity(0.1))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(Color.orange, lineWidth: 1)
+                        )
                 }
 
-            if isRecording {
                 Button("Cancel") {
                     stopRecording()
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
                 .font(.caption)
+            } else {
+                // Mode affichage : montre le raccourci actuel
+                Text(shortcut.displayString)
+                    .font(.system(.body, design: .monospaced))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .frame(minWidth: 120)
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.primary.opacity(0.05))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.primary.opacity(0.2), lineWidth: 1)
+                    )
+                    .onTapGesture {
+                        startRecording()
+                    }
             }
 
             Button {
@@ -148,44 +216,22 @@ struct ShortcutRecorderView: View {
             }
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
-            .help("Réinitialiser au raccourci par défaut (⌥⌘R)")
+            .help("Reset to default (⌥⌘R)")
         }
     }
 
     private func startRecording() {
-        isRecording = true
         ShortcutRecordingState.shared.isRecording = true
-
-        monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-
-            // Ignorer les touches sans modificateur (sauf les touches F)
-            let isFKey = (kVK_F1...kVK_F8).contains(Int(event.keyCode))
-            guard !modifiers.isEmpty || isFKey else {
-                return event
-            }
-
-            // Ignorer si seuls les modificateurs sont pressés (pas de lettre)
-            let modOnlyKeys: Set<UInt16> = [54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
-            guard !modOnlyKeys.contains(event.keyCode) else {
-                return event
-            }
-
-            shortcut = ShortcutKey(
-                keyCode: event.keyCode,
-                modifiers: modifiers.rawValue
-            )
-            stopRecording()
-            return nil  // Consommer l'événement
-        }
+        isRecording = true
     }
 
     private func stopRecording() {
         isRecording = false
-        ShortcutRecordingState.shared.isRecording = false
-        if let monitor {
-            NSEvent.removeMonitor(monitor)
+        // Petit délai avant de réactiver les monitors de l'AppDelegate.
+        // Ça laisse le temps au UserDefaults de se mettre à jour sans
+        // que le nouveau raccourci ne trigger immédiatement un toggle.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            ShortcutRecordingState.shared.isRecording = false
         }
-        monitor = nil
     }
 }
