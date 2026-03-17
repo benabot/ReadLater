@@ -69,7 +69,7 @@ struct ShortcutKey: Codable, Equatable, Sendable {
         case kVK_ANSI_7: "7"
         case kVK_ANSI_8: "8"
         case kVK_ANSI_9: "9"
-        case kVK_Space: "Espace"
+        case kVK_Space: String(localized: "Space")
         case kVK_Return: "↩"
         case kVK_Tab: "⇥"
         case kVK_F1: "F1"
@@ -98,7 +98,7 @@ struct ShortcutRecorderView: View {
     var body: some View {
         HStack(spacing: 8) {
             // Zone d'affichage / enregistrement du raccourci
-            Text(isRecording ? "Appuyez sur un raccourci…" : shortcut.displayString)
+            Text(isRecording ? String(localized: "Press a shortcut…") : shortcut.displayString)
                 .font(.system(.body, design: .monospaced))
                 .foregroundStyle(isRecording ? .orange : .primary)
                 .padding(.horizontal, 10)
@@ -117,7 +117,7 @@ struct ShortcutRecorderView: View {
                 }
 
             if isRecording {
-                Button("Annuler") {
+                Button("Cancel") {
                     stopRecording()
                 }
                 .buttonStyle(.plain)

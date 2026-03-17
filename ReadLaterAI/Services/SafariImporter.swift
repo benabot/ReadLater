@@ -40,13 +40,13 @@ actor SafariImporter {
         var errorDescription: String? {
             switch self {
             case .fileNotFound:
-                "Le fichier Bookmarks.plist de Safari est introuvable"
+                String(localized: "Safari Bookmarks.plist file not found")
             case .sandboxRestriction:
-                "L'app est en mode sandbox et n'a pas accès au dossier Safari. Cliquez ci-dessous pour sélectionner ~/Library/Safari/Bookmarks.plist manuellement."
+                String(localized: "The app is sandboxed and cannot access the Safari folder. Click below to select ~/Library/Safari/Bookmarks.plist manually.")
             case .parsingFailed(let detail):
-                "Impossible de lire la Reading List : \(detail)"
+                String(localized: "Unable to read the Reading List: \(detail)")
             case .noReadingListItems:
-                "Aucun article trouvé dans la Reading List Safari"
+                String(localized: "No articles found in Safari Reading List")
             }
         }
     }

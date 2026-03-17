@@ -97,7 +97,7 @@ struct ContentView: View {
                     .font(.callout)
                     .foregroundStyle(.tertiary)
 
-                TextField("Coller ou saisir une URL…", text: $urlInput)
+                TextField("Paste or enter a URL…", text: $urlInput)
                     .textFieldStyle(.plain)
                     .font(.body)
                     .onSubmit { addArticle() }
@@ -152,7 +152,7 @@ struct ContentView: View {
                 .foregroundStyle(.blue)
 
             VStack(alignment: .leading, spacing: 1) {
-                Text("URL détectée")
+                Text("URL detected")
                     .font(.caption2)
                     .fontWeight(.medium)
                     .foregroundStyle(.blue)
@@ -170,7 +170,7 @@ struct ContentView: View {
                 clipboardMonitor.clearDetectedURL()
                 addArticle()
             } label: {
-                Text("Ajouter")
+                Text("Add")
                     .font(.caption)
                     .fontWeight(.semibold)
             }
@@ -228,9 +228,9 @@ struct ContentView: View {
             }
 
             VStack(spacing: 6) {
-                Text("Prêt à lire plus tard")
+                Text("Ready to read later")
                     .font(.headline)
-                Text("Collez une URL ci-dessus ou importez\nvos articles depuis Safari")
+                Text("Paste a URL above or import\nyour articles from Safari")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -291,8 +291,8 @@ struct ContentView: View {
 
     private func openSafariBookmarks() {
         let panel = NSOpenPanel()
-        panel.title = "Importer la Reading List Safari"
-        panel.message = "Sélectionnez Bookmarks.plist puis cliquez Open"
+        panel.title = String(localized: "Import Safari Reading List")
+        panel.message = String(localized: "Select Bookmarks.plist then click Open")
         panel.allowedContentTypes = [.propertyList]
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
@@ -315,7 +315,7 @@ struct ContentView: View {
             return
         }
         if articles.contains(where: { $0.url == trimmed }) {
-            withAnimation { errorMessage = "Cette URL est déjà dans votre liste" }
+            withAnimation { errorMessage = String(localized: "This URL is already in your list") }
             return
         }
         clipboardMonitor.markAsSeen(trimmed)
@@ -400,7 +400,7 @@ struct ArticleRow: View {
                         Text(article.dateAdded, format: .dateTime.day().month(.abbreviated))
                         if article.wordCount > 0 {
                             Text("·")
-                            Text("\(article.wordCount) mots")
+                            Text("\(article.wordCount) words")
                         }
                         if let s = article.summary {
                             Text("·")
@@ -500,7 +500,7 @@ struct ArticleRow: View {
                 HStack(spacing: 3) {
                     Image(systemName: "sparkles")
                         .font(.caption2)
-                    Text("Résumer")
+                    Text("Summarize")
                         .font(.caption2)
                         .fontWeight(.medium)
                 }

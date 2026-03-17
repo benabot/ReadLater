@@ -79,15 +79,15 @@ enum ArticleError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            "L'URL fournie n'est pas valide"
+            String(localized: "The provided URL is not valid")
         case .networkTimeout:
-            "La requête a expiré (timeout 10s)"
+            String(localized: "The request timed out (10s timeout)")
         case .emptyContent:
-            "Aucun contenu exploitable trouvé"
+            String(localized: "No usable content found")
         case .parsingFailed(let detail):
-            "Erreur de parsing : \(detail)"
+            String(localized: "Parsing error: \(detail)")
         case .saveFailed(let detail):
-            "Erreur de sauvegarde : \(detail)"
+            String(localized: "Save error: \(detail)")
         }
     }
 }

@@ -37,17 +37,17 @@ enum LLMError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .missingAPIKey(let provider):
-            "Clé API manquante pour \(provider). Configurez-la dans les Préférences."
+            String(localized: "Missing API key for \(provider). Configure it in Preferences.")
         case .invalidResponse(let detail):
-            "Réponse invalide du LLM : \(detail)"
+            String(localized: "Invalid LLM response: \(detail)")
         case .apiError(let statusCode, let message):
-            "Erreur API (\(statusCode)) : \(message)"
+            String(localized: "API error (\(statusCode)): \(message)")
         case .networkError(let detail):
-            "Erreur réseau LLM : \(detail)"
+            String(localized: "LLM network error: \(detail)")
         case .jsonDecodingFailed(let detail):
-            "Impossible de décoder le résumé JSON : \(detail)"
+            String(localized: "Unable to decode JSON summary: \(detail)")
         case .textTooShort:
-            "Le texte est trop court pour être résumé (minimum 100 caractères)"
+            String(localized: "Text is too short to summarize (minimum 100 characters)")
         }
     }
 }

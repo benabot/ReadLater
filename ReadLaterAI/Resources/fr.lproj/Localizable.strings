@@ -1,0 +1,148 @@
+
+/* === NSOpenPanel === */
+"Import Safari Reading List" = "Importer la Reading List Safari";
+"Select Bookmarks.plist then click Open" = "Sélectionnez Bookmarks.plist puis cliquez Open";
+
+/* === ContentView === */
+"Paste or enter a URL…" = "Coller ou saisir une URL…";
+"URL detected" = "URL détectée";
+"Add" = "Ajouter";
+"Ready to read later" = "Prêt à lire plus tard";
+"Paste a URL above or import\nyour articles from Safari" = "Collez une URL ci-dessus ou importez\nvos articles depuis Safari";
+"Summarize" = "Résumer";
+"This URL is already in your list" = "Cette URL est déjà dans votre liste";
+"%lld words" = "%lld mots";
+
+/* === PreferencesView === */
+"Preferences" = "Préférences";
+"Back" = "Retour";
+"AI" = "IA";
+"General" = "Général";
+"AI Provider" = "Provider IA";
+"Local, free, private" = "Local, gratuit, privé";
+"API Keys" = "Clés API";
+"Active" = "Active";
+"Edit" = "Modifier";
+"Save" = "Sauver";
+"Keys encrypted in macOS Keychain" = "Clés chiffrées dans le Keychain macOS";
+"Key %@ saved ✓" = "Clé %@ sauvegardée ✓";
+"Key %@ deleted" = "Clé %@ supprimée";
+"Model" = "Modèle";
+"Test connection" = "Tester la connexion";
+"Invalid URL" = "URL invalide";
+"Connected ✓" = "Connecté ✓";
+"HTTP Error" = "Erreur HTTP";
+"Offline" = "Hors ligne";
+"Summary language" = "Langue des résumés";
+"AI summaries will be generated in this language" = "Les résumés IA seront générés dans cette langue";
+"Global shortcut" = "Raccourci global";
+"This shortcut activates the app from any application" = "Ce raccourci active l'app depuis n'importe quelle application";
+"About" = "À propos";
+"Capture, summarize and export your articles" = "Capture, résume et exporte vos articles";
+
+/* === OnboardingView === */
+"Welcome to ReadLater AI" = "Bienvenue dans ReadLater AI";
+"Capture, summarize and export your articles in one click" = "Capturez, résumez et exportez vos articles en un clic";
+"Capture your articles" = "Capturez vos articles";
+"Paste a URL or copy it — it will be detected automatically" = "Collez une URL ou copiez-la — elle sera détectée automatiquement";
+"Import your Safari Reading List in one click" = "Importez votre Reading List Safari en un clic";
+"Content is extracted and cleaned automatically" = "Le contenu est extrait et nettoyé automatiquement";
+"Summarize with AI" = "Résumez avec l'IA";
+"Claude, OpenAI or Ollama — choose your provider" = "Claude, OpenAI ou Ollama — choisissez votre provider";
+"TL;DR, key points, reading time and tags" = "TL;DR, points clés, temps de lecture et tags";
+"API keys encrypted in macOS Keychain" = "Clés API chiffrées dans le Keychain macOS";
+"Export everywhere" = "Exportez partout";
+"Bear, iA Writer, Obsidian, Craft, Ulysses…" = "Bear, iA Writer, Obsidian, Craft, Ulysses…";
+"Copy as Markdown to clipboard" = "Copier en Markdown dans le presse-papiers";
+"Right-click on an article to export" = "Clic droit sur un article pour exporter";
+"Skip" = "Passer";
+"Next" = "Suivant";
+"Let's go!" = "C'est parti !";
+
+/* === HelpView === */
+"User Guide" = "Mode d'emploi";
+"Add an article" = "Ajouter un article";
+"Paste a URL" = "Coller une URL";
+"Paste a URL in the field above and submit" = "Collez une URL dans le champ en haut et validez";
+"Copy a URL" = "Copier une URL";
+"Copy a URL in your browser — a blue banner will appear to add it" = "Copiez une URL dans votre navigateur — une bannière bleue apparaîtra pour l'ajouter";
+"Safari Import" = "Import Safari";
+"Click the Safari icon in the footer to import your Reading List" = "Cliquez sur l'icône Safari dans le footer pour importer votre Reading List";
+"Summarize an article" = "Résumer un article";
+"✨ Button" = "Bouton ✨";
+"Click the sparkles icon to the right of an article to start the AI summary" = "Cliquez sur l'icône sparkles à droite d'un article pour lancer le résumé IA";
+"Click on the article" = "Cliquer sur l'article";
+"Click on a summarized article to show/hide the full summary" = "Cliquez sur un article résumé pour afficher/masquer le résumé complet";
+"Export" = "Exporter";
+"Right-click" = "Clic droit";
+"Right-click on an article to open the export menu" = "Faites un clic droit sur un article pour ouvrir le menu d'export";
+"Supported apps" = "Apps supportées";
+"Manage articles" = "Gérer les articles";
+"Delete" = "Supprimer";
+"Swipe an article to the left or use right-click" = "Glissez un article vers la gauche ou utilisez le clic droit";
+"Indicators" = "Indicateurs";
+"✅ Green" = "✅ Vert";
+"Article summarized successfully" = "Article résumé avec succès";
+"⚠️ Orange" = "⚠️ Orange";
+"Content not extracted (protected site, timeout, etc.)" = "Contenu non extrait (site protégé, timeout, etc.)";
+"✨ Purple" = "✨ Violet";
+"Summary available — click to start" = "Résumé disponible — cliquez pour lancer";
+"Choose between Ollama (local/free), Claude or OpenAI" = "Choisissez entre Ollama (local/gratuit), Claude ou OpenAI";
+"Configure your API keys — they are encrypted in macOS Keychain" = "Configurez vos clés API — elles sont chiffrées dans le Keychain macOS";
+"Language" = "Langue";
+"Choose the language for summary generation" = "Choisissez la langue de génération des résumés";
+"Review the welcome presentation" = "Revoir la présentation de bienvenue";
+
+/* === SafariImportView === */
+"Import from Safari" = "Importer depuis Safari";
+"Reading the Reading List…" = "Lecture de la Reading List…";
+"Error" = "Erreur";
+"No articles found" = "Aucun article trouvé";
+"Your Safari Reading List is empty" = "Votre Reading List Safari est vide";
+"All" = "Tout";
+"None" = "Aucun";
+"Import" = "Importer";
+"Already imported" = "Déjà importé";
+"%lld selected" = "%lld sélectionnés";
+
+/* === ExportMenuView === */
+"Copy as Markdown" = "Copier en Markdown";
+"Copy URL" = "Copier l'URL";
+"Open in browser" = "Ouvrir dans le navigateur";
+
+/* === Export Markdown === */
+"Summary" = "Résumé";
+"Key points" = "Points clés";
+"Estimated reading time" = "Temps de lecture estimé";
+"Tags" = "Tags";
+"Saved on %@ via ReadLater AI" = "Sauvegardé le %@ via ReadLater AI";
+
+/* === Errors === */
+"The provided URL is not valid" = "L'URL fournie n'est pas valide";
+"The request timed out (10s timeout)" = "La requête a expiré (timeout 10s)";
+"No usable content found" = "Aucun contenu exploitable trouvé";
+"Parsing error: %@" = "Erreur de parsing : %@";
+"Save error: %@" = "Erreur de sauvegarde : %@";
+"No content to export (summary or text missing)" = "Aucun contenu à exporter (résumé ou texte manquant)";
+"%@ does not seem to be installed on this Mac" = "%@ ne semble pas installé sur ce Mac";
+"Export error: %@" = "Erreur d'export : %@";
+"Missing API key for %@. Configure it in Preferences." = "Clé API manquante pour %@. Configurez-la dans les Préférences.";
+"Invalid LLM response: %@" = "Réponse invalide du LLM : %@";
+"API error (%lld): %@" = "Erreur API (%lld) : %@";
+"LLM network error: %@" = "Erreur réseau LLM : %@";
+"Unable to decode JSON summary: %@" = "Impossible de décoder le résumé JSON : %@";
+"Text is too short to summarize (minimum 100 characters)" = "Le texte est trop court pour être résumé (minimum 100 caractères)";
+"Unable to save to Keychain (error %lld)" = "Impossible de sauvegarder dans le Keychain (erreur %lld)";
+"Unable to read Keychain (error %lld)" = "Impossible de lire le Keychain (erreur %lld)";
+"Unable to delete from Keychain (error %lld)" = "Impossible de supprimer du Keychain (erreur %lld)";
+"Unable to convert Keychain data" = "Impossible de convertir les données du Keychain";
+"Safari Bookmarks.plist file not found" = "Le fichier Bookmarks.plist de Safari est introuvable";
+"The app is sandboxed and cannot access the Safari folder. Click below to select ~/Library/Safari/Bookmarks.plist manually." = "L'app est en mode sandbox et n'a pas accès au dossier Safari. Cliquez ci-dessous pour sélectionner ~/Library/Safari/Bookmarks.plist manuellement.";
+"Unable to read the Reading List: %@" = "Impossible de lire la Reading List : %@";
+"No articles found in Safari Reading List" = "Aucun article trouvé dans la Reading List Safari";
+"Untitled" = "Sans titre";
+
+/* === Shortcut Recorder === */
+"Press a shortcut…" = "Appuyez sur un raccourci…";
+"Cancel" = "Annuler";
+"Space" = "Espace";

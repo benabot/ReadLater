@@ -7,8 +7,8 @@ struct PreferencesView: View {
     let onDismiss: () -> Void
 
     enum Tab: String, CaseIterable {
-        case ai = "IA"
-        case general = "Général"
+        case ai = "AI"
+        case general = "General"
 
         var icon: String {
             switch self {
@@ -59,10 +59,10 @@ struct PreferencesView: View {
 
     private var header: some View {
         HStack {
-            Label("Préférences", systemImage: "gearshape.fill")
+            Label("Preferences", systemImage: "gearshape.fill")
                 .font(.headline)
             Spacer()
-            Button("Retour") { onDismiss() }
+            Button("Back") { onDismiss() }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
         }
@@ -171,7 +171,7 @@ struct AISettingsSection: View {
 
     private var providerCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Provider IA", systemImage: "cpu")
+            Label("AI Provider", systemImage: "cpu")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
@@ -191,7 +191,7 @@ struct AISettingsSection: View {
 
     private var providerOptions: [ProviderOption] {
         [
-            ProviderOption(id: "ollama", name: "Ollama", description: "Local, gratuit, privé", icon: "desktopcomputer", needsKey: false),
+            ProviderOption(id: "ollama", name: "Ollama", description: String(localized: "Local, free, private"), icon: "desktopcomputer", needsKey: false),
             ProviderOption(id: "claude", name: "Claude", description: "Anthropic API", icon: "brain", needsKey: true),
             ProviderOption(id: "openai", name: "OpenAI", description: "GPT-4o-mini", icon: "globe", needsKey: true),
         ]
@@ -249,7 +249,7 @@ struct AISettingsSection: View {
 
     private var apiKeysCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("Clés API", systemImage: "key.fill")
+            Label("API Keys", systemImage: "key.fill")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
@@ -272,7 +272,7 @@ struct AISettingsSection: View {
             HStack(spacing: 4) {
                 Image(systemName: "lock.shield")
                     .font(.caption)
-                Text("Clés chiffrées dans le Keychain macOS")
+                Text("Keys encrypted in macOS Keychain")
                     .font(.caption)
             }
             .foregroundStyle(.secondary)
@@ -306,12 +306,12 @@ struct AISettingsSection: View {
                     .textFieldStyle(.roundedBorder)
                     .font(.system(.body, design: .monospaced))
 
-                Button(isSaved.wrappedValue ? "Modifier" : "Sauver") {
+                Button(isSaved.wrappedValue ? String(localized: "Edit") : String(localized: "Save")) {
                     do {
                         try KeychainService.save(apiKey: key.wrappedValue, for: keychainKey)
                         key.wrappedValue = ""
                         isSaved.wrappedValue = true
-                        onStatus("Clé \(name) sauvegardée ✓", false)
+                        onStatus(String(localized: "Key \(name) saved ✓"), false)
                     } catch {
                         onStatus(error.localizedDescription, true)
                     }
@@ -325,7 +325,7 @@ struct AISettingsSection: View {
                         do {
                             try KeychainService.delete(for: keychainKey)
                             isSaved.wrappedValue = false
-                            onStatus("Clé \(name) supprimée", false)
+                            onStatus(String(localized: "Key \(name) deleted"), false)
                         } catch {
                             onStatus(error.localizedDescription, true)
                         }
@@ -359,7 +359,7 @@ struct AISettingsSection: View {
                 }
 
                 HStack(spacing: 8) {
-                    Text("Modèle")
+                    Text("Model")
                         .font(.body)
                         .frame(width: 50, alignment: .trailing)
                     TextField("llama3.2", text: $ollamaModel)
@@ -379,7 +379,7 @@ struct AISettingsSection: View {
                                 Image(systemName: "bolt.fill")
                                     .font(.caption)
                             }
-                            Text("Tester la connexion")
+                            Text("Test connection")
                         }
                     }
                     .buttonStyle(.bordered)
@@ -406,7 +406,7 @@ struct AISettingsSection: View {
         ollamaStatus = nil
         Task {
             guard let url = URL(string: "\(ollamaURL)/api/tags") else {
-                ollamaStatus = "URL invalide"
+                ollamaStatus = String(localized: "Invalid URL")
                 isCheckingOllama = false
                 return
             }
@@ -418,15 +418,15 @@ struct AISettingsSection: View {
                     if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                        let models = json["models"] as? [[String: Any]] {
                         let names = models.compactMap { $0["name"] as? String }
-                        ollamaStatus = "✓ \(names.count) modèle\(names.count > 1 ? "s" : "")"
+                        ollamaStatus = "✓ \(names.count) model\(names.count > 1 ? "s" : "")"
                     } else {
-                        ollamaStatus = "✓ Connecté"
+                        ollamaStatus = String(localized: "Connected ✓")
                     }
                 } else {
-                    ollamaStatus = "Erreur HTTP"
+                    ollamaStatus = String(localized: "HTTP Error")
                 }
             } catch {
-                ollamaStatus = "Hors ligne"
+                ollamaStatus = String(localized: "Offline")
             }
             isCheckingOllama = false
         }
@@ -478,7 +478,7 @@ struct GeneralSettingsSection: View {
 
     private var languageCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Langue des résumés", systemImage: "globe")
+            Label("Summary language", systemImage: "globe")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
@@ -513,7 +513,7 @@ struct GeneralSettingsSection: View {
                 }
             }
 
-            Text("Les résumés IA seront générés dans cette langue")
+            Text("AI summaries will be generated in this language")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -523,13 +523,13 @@ struct GeneralSettingsSection: View {
 
     private var shortcutCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Raccourci global", systemImage: "keyboard")
+            Label("Global shortcut", systemImage: "keyboard")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
             ShortcutRecorderView(shortcut: $currentShortcut)
 
-            Text("Ce raccourci active l'app depuis n'importe quelle application")
+            Text("This shortcut activates the app from any application")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -539,7 +539,7 @@ struct GeneralSettingsSection: View {
 
     private var aboutCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("À propos", systemImage: "info.circle")
+            Label("About", systemImage: "info.circle")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
@@ -554,7 +554,7 @@ struct GeneralSettingsSection: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Text("Capture, résume et exporte vos articles")
+                Text("Capture, summarize and export your articles")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 

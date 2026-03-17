@@ -32,7 +32,7 @@ struct ExportMenuView: View {
             Button {
                 ExportService.copyToClipboard(markdown: article.url)
             } label: {
-                Label("Copier l'URL", systemImage: "link")
+                Label("Copy URL", systemImage: "link")
             }
 
             // Ouvrir dans le navigateur
@@ -41,7 +41,7 @@ struct ExportMenuView: View {
                     NSWorkspace.shared.open(url)
                 }
             } label: {
-                Label("Ouvrir dans le navigateur", systemImage: "safari")
+                Label("Open in browser", systemImage: "safari")
             }
         }
     }

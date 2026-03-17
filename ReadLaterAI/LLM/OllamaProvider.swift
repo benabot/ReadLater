@@ -31,7 +31,7 @@ struct OllamaProvider: LLMProvider {
         // On tente d'abord un GET sur /api/tags pour voir s'il répond.
         let isRunning = await checkOllamaRunning()
         guard isRunning else {
-            throw LLMError.networkError("Ollama ne répond pas sur \(baseURL). Vérifiez qu'il est lancé avec `ollama serve`.")
+            throw LLMError.networkError("Ollama is not responding on \(baseURL). Check it is running with `ollama serve`.")
         }
 
         let truncatedText = LLMPrompt.truncateIfNeeded(text, maxChars: 8000)

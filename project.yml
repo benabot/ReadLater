@@ -5,11 +5,13 @@ options:
     macOS: "14.0"
   xcodeVersion: "16.3"
   createIntermediateGroups: true
+  developmentLanguage: en
 
 settings:
   base:
     SWIFT_VERSION: "6.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
+    INFOPLIST_KEY_CFBundleDevelopmentRegion: en
 
 packages:
   SwiftSoup:
@@ -30,6 +32,7 @@ targets:
 
     resources:
       - path: ReadLaterAI/Resources/Assets.xcassets
+      - path: ReadLaterAI/Resources/fr.lproj
 
     dependencies:
       - package: SwiftSoup
