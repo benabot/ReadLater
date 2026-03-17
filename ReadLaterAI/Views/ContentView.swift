@@ -713,7 +713,7 @@ struct ArticleRow: View {
         VStack(alignment: .leading, spacing: 10) {
             // TL;DR dans un encadré glass
             Text(summary.tldr)
-                .font(.callout)
+                .font(.body)
                 .glassCard(cornerRadius: 8, padding: 10)
 
             // Points clés
@@ -726,7 +726,7 @@ struct ArticleRow: View {
                                 .frame(width: 5, height: 5)
                                 .padding(.top, 6)
                             Text(point)
-                                .font(.caption)
+                                .font(.callout)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -738,7 +738,7 @@ struct ArticleRow: View {
                 HStack(spacing: 5) {
                     ForEach(summary.tags, id: \.self) { tag in
                         Text("#\(tag)")
-                            .font(.system(.caption2, design: .rounded, weight: .medium))
+                            .font(.system(.caption, design: .rounded, weight: .medium))
                             .glassPill(color: .purple)
                             .foregroundStyle(.purple)
                     }
