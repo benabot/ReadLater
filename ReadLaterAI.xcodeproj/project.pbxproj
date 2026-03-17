@@ -25,6 +25,7 @@
 		A388BD95209EDB3020863CEF /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = C7089482B4815FA9342B24A4 /* SwiftSoup */; };
 		BB116950F677EA6C65BE1EF2 /* ArticleExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 057F06B1786D2750330FC7A9 /* ArticleExtractor.swift */; };
 		BFA813622119BCFE03748FD2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 82FF68BF6EC82622F9A5A61D /* Assets.xcassets */; };
+		C774D1DCD608C41555C666C4 /* icon.svg in Resources */ = {isa = PBXBuildFile; fileRef = 046D6896F804DFF099313E78 /* icon.svg */; };
 		D12EB5246FDBCD6FD012EC91 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D3F7CBB2BF0A57C5EB9F44 /* OnboardingView.swift */; };
 		DB34F14B71E26EECA7098961 /* SKILL.md in Resources */ = {isa = PBXBuildFile; fileRef = 5E9854D42EB7398F1D980540 /* SKILL.md */; };
 		E198EE2E4547A3F23D43EFA8 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D9D195938CBDEFBFF3F67F71 /* Localizable.strings */; };
@@ -34,6 +35,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		046D6896F804DFF099313E78 /* icon.svg */ = {isa = PBXFileReference; path = icon.svg; sourceTree = "<group>"; };
 		057F06B1786D2750330FC7A9 /* ArticleExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleExtractor.swift; sourceTree = "<group>"; };
 		0E5D6E71F81F14F521057B46 /* SafariImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariImporter.swift; sourceTree = "<group>"; };
 		13DF393AEC9CCDBF4711117B /* GlassStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassStyle.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				82FF68BF6EC82622F9A5A61D /* Assets.xcassets */,
+				046D6896F804DFF099313E78 /* icon.svg */,
 				D9D195938CBDEFBFF3F67F71 /* Localizable.strings */,
 				6823D1F58D1D26790E95463B /* ReadLaterAI.entitlements */,
 			);
@@ -242,6 +245,7 @@
 				0B1CD2E539DAED878D43ADB6 /* CLAUDE.md in Resources */,
 				E198EE2E4547A3F23D43EFA8 /* Localizable.strings in Resources */,
 				DB34F14B71E26EECA7098961 /* SKILL.md in Resources */,
+				C774D1DCD608C41555C666C4 /* icon.svg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

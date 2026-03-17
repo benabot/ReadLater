@@ -102,11 +102,6 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            // Fond glass global
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea()
-
             switch viewMode {
             case .articles:
                 articlesView.transition(.opacity)
@@ -133,6 +128,7 @@ struct ContentView: View {
             }
         }
         .frame(width: 400, height: 540)
+        .background(.ultraThinMaterial)
         .task { clipboardMonitor.start() }
         .onAppear { if !hasSeenOnboarding { viewMode = .onboarding } }
     }
