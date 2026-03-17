@@ -146,3 +146,15 @@
 "Press a shortcut…" = "Appuyez sur un raccourci…";
 "Cancel" = "Annuler";
 "Space" = "Espace";
+
+
+/* === Search & Filters === */
+"Search articles…" = "Rechercher des articles…";
+"Cancel" = "Annuler";
+"All" = "Tous";
+"Unread" = "Non lus";
+"Summarized" = "Résumés";
+"Failed" = "Échoués";
+"No results" = "Aucun résultat";
+"Try a different search term" = "Essayez un autre terme de recherche";
+"Show all" = "Tout afficher";

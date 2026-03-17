@@ -34,6 +34,70 @@ struct ContentView: View {
     @State private var viewMode: ViewMode = .articles
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
 
+    // Recherche & filtres
+    @State private var searchText: String = ""
+    @State private var activeFilter: ArticleFilter = .all
+    @State private var isSearching: Bool = false
+
+    // Enum des filtres disponibles.
+    // C'est comme un système de routes/tabs pour filtrer la liste.
+    enum ArticleFilter: String, CaseIterable {
+        case all
+        case unread
+        case summarized
+        case failed
+
+        var label: String {
+            switch self {
+            case .all: String(localized: "All")
+            case .unread: String(localized: "Unread")
+            case .summarized: String(localized: "Summarized")
+            case .failed: String(localized: "Failed")
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .all: "tray.full"
+            case .unread: "circle"
+            case .summarized: "checkmark.circle"
+            case .failed: "exclamationmark.triangle"
+            }
+        }
+    }
+
+    /// Articles filtrés selon la recherche et le filtre actif.
+    /// C'est une propriété calculée (computed property) — l'équivalent d'un `computed()`
+    /// en Vue.js. Elle se recalcule automatiquement quand ses dépendances changent.
+    private var filteredArticles: [Article] {
+        var result = articles
+
+        // Appliquer le filtre
+        switch activeFilter {
+        case .all:
+            break
+        case .unread:
+            result = result.filter { !$0.isRead }
+        case .summarized:
+            result = result.filter { $0.summary != nil }
+        case .failed:
+            result = result.filter { $0.extractedText == nil }
+        }
+
+        // Appliquer la recherche
+        if !searchText.isEmpty {
+            let query = searchText.lowercased()
+            result = result.filter {
+                $0.title.lowercased().contains(query) ||
+                $0.url.lowercased().contains(query) ||
+                ($0.summary?.tags.contains(where: { $0.lowercased().contains(query) }) ?? false) ||
+                ($0.summary?.tldr.lowercased().contains(query) ?? false)
+            }
+        }
+
+        return result
+    }
+
     var onQuit: (() -> Void)?
 
     var body: some View {
@@ -83,46 +147,100 @@ struct ContentView: View {
                 clipboardBanner(url: detected)
             }
 
+            // Barre de filtres (visible seulement s'il y a des articles)
+            if !articles.isEmpty {
+                filterBar
+            }
+
             articleListSection
             footerSection
         }
     }
 
-    // MARK: - Header (glass search bar)
+    // MARK: - Header (URL input + search toggle)
 
     private var headerSection: some View {
         VStack(spacing: 8) {
             HStack(spacing: 10) {
-                Image(systemName: "magnifyingglass")
-                    .font(.callout)
-                    .foregroundStyle(.tertiary)
+                if isSearching {
+                    // Mode recherche
+                    Image(systemName: "magnifyingglass")
+                        .font(.callout)
+                        .foregroundStyle(Color.accentColor)
 
-                TextField("Paste or enter a URL…", text: $urlInput)
-                    .textFieldStyle(.plain)
-                    .font(.body)
-                    .onSubmit { addArticle() }
+                    TextField("Search articles…", text: $searchText)
+                        .textFieldStyle(.plain)
+                        .font(.body)
 
-                if isLoading {
-                    ProgressView()
-                        .controlSize(.small)
-                } else {
-                    Button { addArticle() } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
+                    if !searchText.isEmpty {
+                        Button {
+                            searchText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.callout)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(.tertiary)
+                    }
+
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            isSearching = false
+                            searchText = ""
+                        }
+                    } label: {
+                        Text("Cancel")
+                            .font(.caption)
                     }
                     .buttonStyle(.plain)
-                    .foregroundStyle(urlInput.isEmpty ? Color.gray.opacity(0.2) : Color.accentColor)
-                    .disabled(urlInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .foregroundStyle(.secondary)
+                } else {
+                    // Mode ajout URL
+                    Image(systemName: "link.badge.plus")
+                        .font(.callout)
+                        .foregroundStyle(.tertiary)
+
+                    TextField("Paste or enter a URL…", text: $urlInput)
+                        .textFieldStyle(.plain)
+                        .font(.body)
+                        .onSubmit { addArticle() }
+
+                    if isLoading {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        // Bouton recherche (visible seulement s'il y a des articles)
+                        if !articles.isEmpty {
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isSearching = true
+                                }
+                            } label: {
+                                Image(systemName: "magnifyingglass")
+                                    .font(.callout)
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(.tertiary)
+                        }
+
+                        Button { addArticle() } label: {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                        }
+                        .buttonStyle(.plain)
+                        .foregroundStyle(urlInput.isEmpty ? Color.gray.opacity(0.2) : Color.accentColor)
+                        .disabled(urlInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
                 }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(Color.primary.opacity(0.04))
+                    .fill(isSearching ? Color.accentColor.opacity(0.04) : Color.primary.opacity(0.04))
                     .overlay(
                         RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+                            .stroke(isSearching ? Color.accentColor.opacity(0.2) : Color.primary.opacity(0.08), lineWidth: 0.5)
                     )
             )
 
@@ -191,16 +309,96 @@ struct ContentView: View {
         .transition(.move(edge: .top).combined(with: .opacity))
     }
 
+    // MARK: - Filter Bar
+
+    private var filterBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(ArticleFilter.allCases, id: \.self) { filter in
+                    let count = countForFilter(filter)
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            activeFilter = activeFilter == filter ? .all : filter
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: filter.icon)
+                                .font(.caption2)
+                            Text(filter.label)
+                                .font(.caption)
+                            if filter != .all && count > 0 {
+                                Text("\(count)")
+                                    .font(.system(.caption2, design: .rounded, weight: .medium))
+                                    .foregroundStyle(activeFilter == filter ? .primary : .tertiary)
+                            }
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(
+                            Capsule()
+                                .fill(activeFilter == filter
+                                      ? Color.accentColor.opacity(0.15)
+                                      : Color.primary.opacity(0.04))
+                                .overlay(
+                                    Capsule()
+                                        .stroke(activeFilter == filter
+                                                ? Color.accentColor.opacity(0.3)
+                                                : Color.clear, lineWidth: 0.5)
+                                )
+                        )
+                        .foregroundStyle(activeFilter == filter ? .primary : .secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+        }
+    }
+
+    /// Compte les articles pour chaque filtre (pour les badges).
+    private func countForFilter(_ filter: ArticleFilter) -> Int {
+        switch filter {
+        case .all: articles.count
+        case .unread: articles.filter { !$0.isRead }.count
+        case .summarized: articles.filter { $0.summary != nil }.count
+        case .failed: articles.filter { $0.extractedText == nil }.count
+        }
+    }
+
     // MARK: - Article List
 
     private var articleListSection: some View {
         Group {
             if articles.isEmpty {
                 emptyState
+            } else if filteredArticles.isEmpty {
+                // Recherche ou filtre sans résultat
+                VStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 28))
+                        .foregroundStyle(.quaternary)
+                    Text("No results")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    if !searchText.isEmpty {
+                        Text("Try a different search term")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    } else {
+                        Button("Show all") {
+                            withAnimation { activeFilter = .all }
+                        }
+                        .font(.caption)
+                        .buttonStyle(.plain)
+                        .foregroundStyle(Color.accentColor)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
                     LazyVStack(spacing: 4) {
-                        ForEach(articles) { article in
+                        ForEach(filteredArticles) { article in
                             ArticleRow(article: article)
                         }
                     }
