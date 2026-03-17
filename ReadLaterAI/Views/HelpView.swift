@@ -21,48 +21,48 @@ struct HelpView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     helpSection(
-                        title: "Add an article",
+                        title: String(localized: "Add an article"),
                         icon: "plus.circle",
                         items: [
-                            HelpItem(gesture: "Paste a URL", description: "Paste a URL in the field above and submit"),
-                            HelpItem(gesture: "Copy a URL", description: "Copy a URL in your browser — a blue banner will appear to add it"),
-                            HelpItem(gesture: "Safari Import", description: "Click the Safari icon in the footer to import your Reading List"),
+                            HelpItem(gesture: String(localized: "Paste a URL"), description: String(localized: "Paste a URL in the field above and submit")),
+                            HelpItem(gesture: String(localized: "Copy a URL"), description: String(localized: "Copy a URL in your browser — a blue banner will appear to add it")),
+                            HelpItem(gesture: String(localized: "Safari Import"), description: String(localized: "Click the Safari icon in the footer to import your Reading List")),
                         ]
                     )
 
                     helpSection(
-                        title: "Summarize an article",
+                        title: String(localized: "Summarize an article"),
                         icon: "sparkles",
                         items: [
-                            HelpItem(gesture: "✨ Button", description: "Click the sparkles icon to the right of an article to start the AI summary"),
-                            HelpItem(gesture: "Click on the article", description: "Click on a summarized article to show/hide the full summary"),
+                            HelpItem(gesture: String(localized: "✨ Button"), description: String(localized: "Click the sparkles icon to the right of an article to start the AI summary")),
+                            HelpItem(gesture: String(localized: "Click on the article"), description: String(localized: "Click on a summarized article to show/hide the full summary")),
                         ]
                     )
 
                     helpSection(
-                        title: "Export",
+                        title: String(localized: "Export"),
                         icon: "square.and.arrow.up",
                         items: [
-                            HelpItem(gesture: "Right-click", description: "Right-click on an article to open the export menu"),
-                            HelpItem(gesture: "Supported apps", description: "Bear, iA Writer, Obsidian, Craft, Ulysses, Evernote, Notes, Clipboard"),
+                            HelpItem(gesture: String(localized: "Right-click"), description: String(localized: "Right-click on an article to open the export menu")),
+                            HelpItem(gesture: String(localized: "Supported apps"), description: "Bear, iA Writer, Obsidian, Craft, Ulysses, Evernote, Notes, Clipboard"),
                         ]
                     )
 
                     helpSection(
-                        title: "Manage articles",
+                        title: String(localized: "Manage articles"),
                         icon: "list.bullet",
                         items: [
-                            HelpItem(gesture: "Delete", description: "Swipe an article to the left or use right-click"),
+                            HelpItem(gesture: String(localized: "Delete"), description: String(localized: "Swipe an article to the left or use right-click")),
                         ]
                     )
 
                     helpSection(
-                        title: "Indicators",
+                        title: String(localized: "Indicators"),
                         icon: "info.circle",
                         items: [
-                            HelpItem(gesture: "✅ Green", description: "Article summarized successfully"),
-                            HelpItem(gesture: "⚠️ Orange", description: "Content not extracted (protected site, timeout, etc.)"),
-                            HelpItem(gesture: "✨ Purple", description: "Summary available — click to start"),
+                            HelpItem(gesture: String(localized: "✅ Green"), description: String(localized: "Article summarized successfully")),
+                            HelpItem(gesture: String(localized: "⚠️ Orange"), description: String(localized: "Content not extracted (protected site, timeout, etc.)")),
+                            HelpItem(gesture: String(localized: "✨ Purple"), description: String(localized: "Summary available — click to start")),
                         ]
                     )
 
@@ -70,9 +70,9 @@ struct HelpView: View {
                         title: "Preferences",
                         icon: "gearshape",
                         items: [
-                            HelpItem(gesture: "AI Provider", description: "Choose between Ollama (local/free), Claude or OpenAI"),
-                            HelpItem(gesture: "API Keys", description: "Configure your API keys — they are encrypted in macOS Keychain"),
-                            HelpItem(gesture: "Language", description: "Choose the language for summary generation"),
+                            HelpItem(gesture: String(localized: "AI Provider"), description: String(localized: "Choose between Ollama (local/free), Claude or OpenAI")),
+                            HelpItem(gesture: String(localized: "API Keys"), description: String(localized: "Configure your API keys — they are encrypted in macOS Keychain")),
+                            HelpItem(gesture: String(localized: "Language"), description: String(localized: "Choose the language for summary generation")),
                         ]
                     )
 

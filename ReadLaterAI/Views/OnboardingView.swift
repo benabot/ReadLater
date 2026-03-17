@@ -5,44 +5,50 @@ struct OnboardingView: View {
     let onDismiss: () -> Void
     @State private var currentPage: Int = 0
 
-    private let pages: [OnboardingPage] = [
-        OnboardingPage(
-            icon: "text.page.badge.magnifyingglass",
-            title: "Welcome to ReadLater AI",
-            subtitle: "Capture, summarize and export your articles in one click",
-            features: []
-        ),
-        OnboardingPage(
-            icon: "link.badge.plus",
-            title: "Capture your articles",
-            subtitle: "",
-            features: [
-                Feature(icon: "doc.on.clipboard", text: "Paste a URL or copy it — it will be detected automatically"),
-                Feature(icon: "safari", text: "Import your Safari Reading List in one click"),
-                Feature(icon: "globe", text: "Content is extracted and cleaned automatically"),
-            ]
-        ),
-        OnboardingPage(
-            icon: "sparkles",
-            title: "Summarize with AI",
-            subtitle: "",
-            features: [
-                Feature(icon: "brain", text: "Claude, OpenAI or Ollama — choose your provider"),
-                Feature(icon: "text.quote", text: "TL;DR, key points, reading time and tags"),
-                Feature(icon: "key", text: "API keys encrypted in macOS Keychain"),
-            ]
-        ),
-        OnboardingPage(
-            icon: "square.and.arrow.up",
-            title: "Export everywhere",
-            subtitle: "",
-            features: [
-                Feature(icon: "text.book.closed", text: "Bear, iA Writer, Obsidian, Craft, Ulysses…"),
-                Feature(icon: "doc.on.doc", text: "Copy as Markdown to clipboard"),
-                Feature(icon: "cursorarrow.click.2", text: "Right-click on an article to export"),
-            ]
-        ),
-    ]
+    // Les chaînes sont wrappées dans String(localized:) pour que le système
+    // de localisation d'Apple les traduise. Sans ça, les strings dans un tableau
+    // de structs ne sont PAS localisées automatiquement par SwiftUI
+    // (seuls les Text("littéral") le sont).
+    private var pages: [OnboardingPage] {
+        [
+            OnboardingPage(
+                icon: "text.page.badge.magnifyingglass",
+                title: String(localized: "Welcome to ReadLater AI"),
+                subtitle: String(localized: "Capture, summarize and export your articles in one click"),
+                features: []
+            ),
+            OnboardingPage(
+                icon: "link.badge.plus",
+                title: String(localized: "Capture your articles"),
+                subtitle: "",
+                features: [
+                    Feature(icon: "doc.on.clipboard", text: String(localized: "Paste a URL or copy it — it will be detected automatically")),
+                    Feature(icon: "safari", text: String(localized: "Import your Safari Reading List in one click")),
+                    Feature(icon: "globe", text: String(localized: "Content is extracted and cleaned automatically")),
+                ]
+            ),
+            OnboardingPage(
+                icon: "sparkles",
+                title: String(localized: "Summarize with AI"),
+                subtitle: "",
+                features: [
+                    Feature(icon: "brain", text: String(localized: "Claude, OpenAI or Ollama — choose your provider")),
+                    Feature(icon: "text.quote", text: String(localized: "TL;DR, key points, reading time and tags")),
+                    Feature(icon: "key", text: String(localized: "API keys encrypted in macOS Keychain")),
+                ]
+            ),
+            OnboardingPage(
+                icon: "square.and.arrow.up",
+                title: String(localized: "Export everywhere"),
+                subtitle: "",
+                features: [
+                    Feature(icon: "text.book.closed", text: String(localized: "Bear, iA Writer, Obsidian, Craft, Ulysses…")),
+                    Feature(icon: "doc.on.doc", text: String(localized: "Copy as Markdown to clipboard")),
+                    Feature(icon: "cursorarrow.click.2", text: String(localized: "Right-click on an article to export")),
+                ]
+            ),
+        ]
+    }
 
     var body: some View {
         VStack(spacing: 0) {
