@@ -90,6 +90,21 @@ struct ShortcutKey: Codable, Equatable, Sendable {
 // L'utilisateur clique sur le champ, puis appuie sur la combinaison souhaitée.
 // C'est comme les "hotkey recorders" dans Alfred, Raycast, etc.
 
+// MARK: - ShortcutRecordingState
+// Flag global partagé entre le ShortcutRecorderView et l'AppDelegate.
+// Quand isRecording = true, l'AppDelegate ignore les raccourcis clavier
+// pour ne pas interférer avec l'enregistrement d'un nouveau raccourci.
+//
+// @MainActor car il est lu/écrit uniquement depuis le main thread (UI).
+// C'est l'équivalent d'une variable globale réactive en Vue (un petit store).
+
+@MainActor
+final class ShortcutRecordingState {
+    static let shared = ShortcutRecordingState()
+    var isRecording = false
+    private init() {}
+}
+
 struct ShortcutRecorderView: View {
     @Binding var shortcut: ShortcutKey
     @State private var isRecording = false
@@ -139,8 +154,8 @@ struct ShortcutRecorderView: View {
 
     private func startRecording() {
         isRecording = true
+        ShortcutRecordingState.shared.isRecording = true
 
-        // Écouter le prochain événement clavier
         monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
 
@@ -167,6 +182,7 @@ struct ShortcutRecorderView: View {
 
     private func stopRecording() {
         isRecording = false
+        ShortcutRecordingState.shared.isRecording = false
         if let monitor {
             NSEvent.removeMonitor(monitor)
         }

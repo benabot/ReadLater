@@ -222,6 +222,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Monitor GLOBAL — capte les touches quand l'app N'EST PAS au premier plan.
         // C'est le cas principal : l'utilisateur est dans Safari et appuie sur ⌥⌘R.
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            // Ignorer si on est en train d'enregistrer un nouveau raccourci
+            guard !ShortcutRecordingState.shared.isRecording else { return }
+
             let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             if mods == requiredModifiers && event.keyCode == requiredKeyCode {
                 DispatchQueue.main.async {
@@ -233,6 +236,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Monitor LOCAL — capte les touches quand l'app EST au premier plan.
         // Utile pour fermer le popover avec le même raccourci.
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            // Ignorer si on est en train d'enregistrer un nouveau raccourci.
+            // Le ShortcutRecorderView a son propre monitor qui consomme l'événement.
+            guard !ShortcutRecordingState.shared.isRecording else { return event }
+
             let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
             if mods == requiredModifiers && event.keyCode == requiredKeyCode {
                 DispatchQueue.main.async {
