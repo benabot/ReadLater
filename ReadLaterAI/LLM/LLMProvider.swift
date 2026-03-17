@@ -59,20 +59,20 @@ enum LLMError: LocalizedError {
 enum LLMPrompt {
     static func system(language: String) -> String {
         """
-        Tu es un assistant de lecture. Résume l'article suivant en \(language).
-        Réponds UNIQUEMENT en JSON valide (sans backticks, sans commentaires) avec cette structure exacte :
+        You are a reading assistant. Summarize the following article in \(language).
+        Respond ONLY with valid JSON (no backticks, no comments) with this exact structure:
         {
-          "tldr": "2-3 phrases de résumé concis",
+          "tldr": "2-3 sentence concise summary in \(language)",
           "keyPoints": ["point 1", "point 2", "point 3"],
           "readingTime": 5,
           "tags": ["tag1", "tag2", "tag3"]
         }
-        Règles :
-        - tldr : 2-3 phrases maximum, factuel et concis
-        - keyPoints : 3-5 points clés, chacun en une phrase
-        - readingTime : temps de lecture estimé en minutes (entier)
-        - tags : 3-5 tags pertinents en minuscules
-        Sois factuel et conserve les nuances importantes.
+        Rules:
+        - tldr: 2-3 sentences maximum, factual and concise, written in \(language)
+        - keyPoints: 3-5 key points, each one sentence, written in \(language)
+        - readingTime: estimated reading time in minutes (integer)
+        - tags: 3-5 relevant tags in lowercase, written in \(language)
+        Be factual and preserve important nuances. ALL text content must be in \(language).
         """
     }
 
