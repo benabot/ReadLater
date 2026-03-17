@@ -4,7 +4,7 @@ import Carbon.HIToolbox
 
 // MARK: - ShortcutKey
 
-struct ShortcutKey: Codable, Equatable, Sendable {
+struct ShortcutKey: Codable, Equatable, Hashable, Sendable {
     let keyCode: UInt16
     let modifiers: UInt
 
@@ -23,6 +23,9 @@ struct ShortcutKey: Codable, Equatable, Sendable {
         parts.append(keyName)
         return parts.joined()
     }
+
+    /// Identifiant unique pour Picker
+    var id: String { "\(keyCode)-\(modifiers)" }
 
     private var keyName: String {
         switch Int(keyCode) {
@@ -52,34 +55,13 @@ struct ShortcutKey: Codable, Equatable, Sendable {
         case kVK_ANSI_X: "X"
         case kVK_ANSI_Y: "Y"
         case kVK_ANSI_Z: "Z"
-        case kVK_ANSI_0: "0"
-        case kVK_ANSI_1: "1"
-        case kVK_ANSI_2: "2"
-        case kVK_ANSI_3: "3"
-        case kVK_ANSI_4: "4"
-        case kVK_ANSI_5: "5"
-        case kVK_ANSI_6: "6"
-        case kVK_ANSI_7: "7"
-        case kVK_ANSI_8: "8"
-        case kVK_ANSI_9: "9"
         case kVK_Space: String(localized: "Space")
-        case kVK_Return: "↩"
-        case kVK_Tab: "⇥"
-        case kVK_F1: "F1"
-        case kVK_F2: "F2"
-        case kVK_F3: "F3"
-        case kVK_F4: "F4"
-        case kVK_F5: "F5"
-        case kVK_F6: "F6"
-        case kVK_F7: "F7"
-        case kVK_F8: "F8"
         default: "?\(keyCode)"
         }
     }
 }
 
 // MARK: - ShortcutRecordingState
-// Flag global pour que l'AppDelegate sache quand ignorer les raccourcis.
 
 @MainActor
 final class ShortcutRecordingState {
@@ -88,126 +70,59 @@ final class ShortcutRecordingState {
     private init() {}
 }
 
-// MARK: - KeyCaptureView (NSViewRepresentable)
-// Une NSView custom qui capture les keyDown quand elle a le focus.
-// Contrairement aux NSEvent monitors (qui interceptent TOUS les événements
-// de l'app), cette NSView ne capture que les touches quand elle est "first
-// responder" (= quand elle a le focus clavier).
-//
-// C'est l'approche la plus propre car :
-// 1. Pas de conflit avec les monitors de l'AppDelegate
-// 2. L'événement est consommé par la vue avant d'arriver aux monitors
-// 3. Pas besoin de flag de synchronisation complexe
-//
-// NSViewRepresentable est le pont pour utiliser une NSView AppKit dans SwiftUI.
-// C'est comme un wrapper de composant natif (Web Component en JS).
+// MARK: - Predefined Shortcuts
+// Liste de raccourcis prédéfinis que l'utilisateur peut choisir dans un menu.
+// C'est plus fiable qu'un recorder custom car aucun monitor NSEvent n'est
+// nécessaire, ce qui évite les conflits avec l'AppDelegate.
 
-struct KeyCaptureView: NSViewRepresentable {
-    var onKeyDown: (UInt16, NSEvent.ModifierFlags) -> Void
-
-    func makeNSView(context: Context) -> KeyCaptureNSView {
-        let view = KeyCaptureNSView()
-        view.onKeyDown = onKeyDown
-        return view
-    }
-
-    func updateNSView(_ nsView: KeyCaptureNSView, context: Context) {
-        nsView.onKeyDown = onKeyDown
-    }
-
-    // La NSView custom qui devient first responder et capte les touches.
-    class KeyCaptureNSView: NSView {
-        var onKeyDown: ((UInt16, NSEvent.ModifierFlags) -> Void)?
-
-        // acceptsFirstResponder = cette vue PEUT recevoir le focus clavier.
-        // Par défaut, les NSView ne l'acceptent pas.
-        override var acceptsFirstResponder: Bool { true }
-
-        // Quand la vue apparaît, on prend le focus automatiquement.
-        override func viewDidMoveToWindow() {
-            super.viewDidMoveToWindow()
-            window?.makeFirstResponder(self)
-        }
-
-        // Intercepte les touches et les passe au callback.
-        // L'événement est "consommé" ici — il ne remonte PAS aux monitors.
-        override func keyDown(with event: NSEvent) {
-            let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-
-            // Ignorer les touches modificateurs seules (Cmd, Alt, etc. sans lettre)
-            let modOnlyKeys: Set<UInt16> = [54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
-            guard !modOnlyKeys.contains(event.keyCode) else { return }
-
-            // Ignorer les touches sans modificateur (sauf F-keys)
-            let isFKey = (kVK_F1...kVK_F8).contains(Int(event.keyCode))
-            guard !modifiers.isEmpty || isFKey else { return }
-
-            onKeyDown?(event.keyCode, modifiers)
-        }
-    }
+enum PredefinedShortcuts {
+    static let all: [ShortcutKey] = [
+        // ⌥⌘ + lettre
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_R), modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_L), modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_B), modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_S), modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_K), modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue),
+        // ⌃⌥ + lettre
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_R), modifiers: NSEvent.ModifierFlags([.control, .option]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_L), modifiers: NSEvent.ModifierFlags([.control, .option]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_B), modifiers: NSEvent.ModifierFlags([.control, .option]).rawValue),
+        // ⇧⌘ + lettre
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_R), modifiers: NSEvent.ModifierFlags([.shift, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_L), modifiers: NSEvent.ModifierFlags([.shift, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_B), modifiers: NSEvent.ModifierFlags([.shift, .command]).rawValue),
+        // ⌃⇧ + lettre
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_R), modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_L), modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue),
+        // ⌃⌘ + lettre
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_R), modifiers: NSEvent.ModifierFlags([.control, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_L), modifiers: NSEvent.ModifierFlags([.control, .command]).rawValue),
+    ]
 }
 
-// MARK: - ShortcutRecorderView
+// MARK: - ShortcutRecorderView (Picker-based)
+// Au lieu d'un recorder qui capture les touches (source de bugs avec NSPopover),
+// on utilise un simple menu déroulant avec des raccourcis prédéfinis.
+// C'est le pattern utilisé par CleanShot, Paste, Spark, etc.
 
 struct ShortcutRecorderView: View {
     @Binding var shortcut: ShortcutKey
-    @State private var isRecording = false
 
     var body: some View {
         HStack(spacing: 8) {
-            if isRecording {
-                // Mode enregistrement : affiche la NSView de capture
-                ZStack {
-                    // La KeyCaptureView invisible qui capture les touches
-                    KeyCaptureView { keyCode, modifiers in
-                        shortcut = ShortcutKey(keyCode: keyCode, modifiers: modifiers.rawValue)
-                        stopRecording()
-                    }
-                    .frame(width: 0, height: 0)
-                    .opacity(0)
-
-                    Text("Press a shortcut…")
+            // Menu déroulant avec les raccourcis disponibles.
+            // Picker en SwiftUI = <select> en HTML.
+            Picker("", selection: $shortcut) {
+                ForEach(PredefinedShortcuts.all, id: \.id) { preset in
+                    Text(preset.displayString)
                         .font(.system(.body, design: .monospaced))
-                        .foregroundStyle(.orange)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .frame(minWidth: 120)
-                        .background(
-                            RoundedRectangle(cornerRadius: 6)
-                                .fill(Color.orange.opacity(0.1))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 6)
-                                .stroke(Color.orange, lineWidth: 1)
-                        )
+                        .tag(preset)
                 }
-
-                Button("Cancel") {
-                    stopRecording()
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-                .font(.caption)
-            } else {
-                // Mode affichage : montre le raccourci actuel
-                Text(shortcut.displayString)
-                    .font(.system(.body, design: .monospaced))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .frame(minWidth: 120)
-                    .background(
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(Color.primary.opacity(0.05))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color.primary.opacity(0.2), lineWidth: 1)
-                    )
-                    .onTapGesture {
-                        startRecording()
-                    }
             }
+            .pickerStyle(.menu)
+            .frame(minWidth: 130)
 
+            // Bouton reset
             Button {
                 shortcut = .defaultShortcut
             } label: {
@@ -217,21 +132,6 @@ struct ShortcutRecorderView: View {
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
             .help("Reset to default (⌥⌘R)")
-        }
-    }
-
-    private func startRecording() {
-        ShortcutRecordingState.shared.isRecording = true
-        isRecording = true
-    }
-
-    private func stopRecording() {
-        isRecording = false
-        // Petit délai avant de réactiver les monitors de l'AppDelegate.
-        // Ça laisse le temps au UserDefaults de se mettre à jour sans
-        // que le nouveau raccourci ne trigger immédiatement un toggle.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            ShortcutRecordingState.shared.isRecording = false
         }
     }
 }
