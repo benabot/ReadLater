@@ -308,19 +308,33 @@ enum ExportService {
     }
 
     // MARK: - Notes (Apple)
-    // Utilise NSSharingService directement (pas le Picker/Share Sheet).
-    // On cherche le service "com.apple.Notes.SharingExtension" pour envoyer
-    // directement dans Notes sans passer par le menu de partage.
+    // Utilise osascript (AppleScript) pour créer une note directement dans Notes.
+    // NSSharingService ne fonctionne pas correctement dans un NSPopover sandboxé.
+    //
+    // AppleScript est le langage de scripting inter-apps de macOS.
+    // C'est comme utiliser `child_process.exec()` en Node.js pour piloter une app externe.
 
     @MainActor
     private static func exportToNotes(markdown: String) {
-        // Chercher le service Notes parmi les services disponibles
-        let services = NSSharingService.sharingServices(forItems: [markdown])
-        if let notesService = services.first(where: { $0.title.contains("Notes") }) {
-            notesService.perform(withItems: [markdown])
-        } else {
-            // Fallback : copier dans le clipboard si Notes n'est pas trouvé
-            copyToClipboard(markdown: markdown)
+        // Escape les guillemets et backslashes pour AppleScript
+        let escaped = markdown
+            .replacingOccurrences(of: "\\", with: "\\\\")
+            .replacingOccurrences(of: "\"", with: "\\\"")
+
+        let script = """
+        tell application "Notes"
+            activate
+            set newNote to make new note at folder "Notes" with properties {body:"\(escaped)"}
+        end tell
+        """
+
+        if let appleScript = NSAppleScript(source: script) {
+            var error: NSDictionary?
+            appleScript.executeAndReturnError(&error)
+            if let error {
+                // Fallback clipboard si AppleScript échoue (sandbox)
+                copyToClipboard(markdown: markdown)
+            }
         }
     }
 
