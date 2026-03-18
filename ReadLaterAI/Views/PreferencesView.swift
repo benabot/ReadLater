@@ -491,6 +491,42 @@ struct GeneralSettingsSection: View {
             Text("This shortcut activates the app from any application")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+            // Guide accessibilité
+            VStack(alignment: .leading, spacing: 6) {
+                Label("Accessibility required", systemImage: "hand.raised.fill")
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.orange)
+
+                Text("To use the global shortcut, add ReadLater AI to System Settings → Privacy & Security → Accessibility")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                Button {
+                    NSWorkspace.shared.open(
+                        URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
+                    )
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "gear")
+                            .font(.caption2)
+                        Text("Open Accessibility Settings")
+                            .font(.caption)
+                    }
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(Color.accentColor)
+            }
+            .padding(10)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.orange.opacity(0.06))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.orange.opacity(0.15), lineWidth: 0.5)
+                    )
+            )
         }
     }
 
