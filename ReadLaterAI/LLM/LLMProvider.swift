@@ -57,22 +57,42 @@ enum LLMError: LocalizedError {
 /// Le prompt système envoyé à tous les providers.
 /// On le centralise ici pour garantir la cohérence entre Claude, OpenAI et Ollama.
 enum LLMPrompt {
+
+    /// Mappe le code de langue vers le nom anglais pour le prompt.
+    /// Les LLMs comprennent mieux "French" que "français" dans un prompt anglais.
+    private static func englishName(for language: String) -> String {
+        switch language.lowercased() {
+        case "français": "French"
+        case "english": "English"
+        case "español": "Spanish"
+        case "deutsch": "German"
+        case "italiano": "Italian"
+        case "português": "Portuguese"
+        default: language
+        }
+    }
+
     static func system(language: String) -> String {
-        """
-        You are a reading assistant. Summarize the following article in \(language).
-        Respond ONLY with valid JSON (no backticks, no comments) with this exact structure:
+        let lang = englishName(for: language)
+        return """
+        You are a reading assistant. Your task is to summarize articles.
+        IMPORTANT: You MUST write ALL output text in \(lang). Every single word of your response content must be in \(lang).
+
+        Respond ONLY with valid JSON (no backticks, no markdown, no comments) using this exact structure:
         {
-          "tldr": "2-3 sentence concise summary in \(language)",
+          "tldr": "2-3 sentence concise summary",
           "keyPoints": ["point 1", "point 2", "point 3"],
           "readingTime": 5,
           "tags": ["tag1", "tag2", "tag3"]
         }
+
         Rules:
-        - tldr: 2-3 sentences maximum, factual and concise, written in \(language)
-        - keyPoints: 3-5 key points, each one sentence, written in \(language)
-        - readingTime: estimated reading time in minutes (integer)
-        - tags: 3-5 relevant tags in lowercase, written in \(language)
-        Be factual and preserve important nuances. ALL text content must be in \(language).
+        - tldr: 2-3 sentences maximum, factual and concise. Written in \(lang).
+        - keyPoints: 3-5 key points, each one sentence. Written in \(lang).
+        - readingTime: estimated reading time in minutes (integer).
+        - tags: 3-5 relevant lowercase tags. Written in \(lang).
+
+        LANGUAGE REQUIREMENT: All values (tldr, keyPoints, tags) MUST be written in \(lang). Do NOT use any other language.
         """
     }
 

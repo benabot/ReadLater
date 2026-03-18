@@ -120,6 +120,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             NSApp.activate(ignoringOtherApps: true)
+            // Réappliquer le thème car la window du popover est recréée à chaque ouverture
+            applyStoredAppearance()
         }
     }
 
@@ -189,14 +191,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func applyStoredAppearance() {
         let mode = UserDefaults.standard.string(forKey: "appAppearance") ?? "system"
+        applyAppearance(mode)
+    }
+
+    /// Applique le thème sur l'app ET le popover.
+    /// NSApp.appearance contrôle les fenêtres classiques mais le NSPopover
+    /// peut ne pas hériter automatiquement. On force aussi sur le contentViewController.
+    func applyAppearance(_ mode: String) {
+        let appearance: NSAppearance?
         switch mode {
         case "light":
-            NSApp.appearance = NSAppearance(named: .aqua)
+            appearance = NSAppearance(named: .aqua)
         case "dark":
-            NSApp.appearance = NSAppearance(named: .darkAqua)
+            appearance = NSAppearance(named: .darkAqua)
         default:
-            NSApp.appearance = nil
+            appearance = nil
         }
+        NSApp.appearance = appearance
+        popover?.contentViewController?.view.window?.appearance = appearance
+        popover?.contentViewController?.view.appearance = appearance
     }
 
     private func removeShortcutMonitors() {

@@ -180,3 +180,8 @@
 "System" = "Système";
 "Light" = "Clair";
 "Dark" = "Sombre";
+
+
+/* === Accessibility === */
+"Accessibility permission required" = "Permission Accessibilité requise";
+"Open Settings" = "Ouvrir les Réglages";
