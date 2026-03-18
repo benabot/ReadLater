@@ -22,7 +22,7 @@ struct OllamaProvider: LLMProvider {
         self.baseURL = baseURL
     }
 
-    func summarize(text: String, language: String) async throws -> Summary {
+    func summarize(text: String) async throws -> Summary {
         guard text.count >= 100 else {
             throw LLMError.textTooShort
         }
@@ -51,7 +51,7 @@ struct OllamaProvider: LLMProvider {
 
         let requestBody: [String: Any] = [
             "model": modelName,
-            "system": LLMPrompt.system(language: language),
+            "system": LLMPrompt.system(),
             "prompt": truncatedText,
             "stream": false,
             "options": [

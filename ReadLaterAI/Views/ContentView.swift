@@ -611,7 +611,7 @@ struct ContentView: View {
         guard !toSummarize.isEmpty else { return }
 
         let selectedProvider = UserDefaults.standard.string(forKey: "selectedProvider") ?? "ollama"
-        let language = UserDefaults.standard.string(forKey: "summaryLanguage") ?? "français"
+
 
         isBatchSummarizing = true
         batchProgress = 0
@@ -627,7 +627,7 @@ struct ContentView: View {
             for article in toSummarize {
                 guard let text = article.extractedText else { continue }
                 do {
-                    let summary = try await provider.summarize(text: text, language: language)
+                    let summary = try await provider.summarize(text: text)
                     article.summary = summary
                     article.isRead = true
                 } catch {
@@ -721,7 +721,7 @@ struct ArticleRow: View {
     @State private var isExpanded = false
     @State private var isHovered = false
     @AppStorage("selectedProvider") private var selectedProvider: String = "ollama"
-    @AppStorage("summaryLanguage") private var summaryLanguage: String = "français"
+
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -922,7 +922,7 @@ struct ArticleRow: View {
         Task {
             do {
                 let provider: any LLMProvider = resolveProvider()
-                let summary = try await provider.summarize(text: text, language: summaryLanguage)
+                let summary = try await provider.summarize(text: text)
                 article.summary = summary
                 article.isRead = true
                 withAnimation(.easeInOut(duration: 0.25)) { isExpanded = true }

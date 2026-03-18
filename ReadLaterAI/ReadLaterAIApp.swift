@@ -1,6 +1,13 @@
 import SwiftUI
 import SwiftData
 import UserNotifications
+@preconcurrency import ApplicationServices
+
+/// Demande la permission Accessibilité en dehors de tout actor.
+private func requestAccessibilityTrust() {
+    let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
+    AXIsProcessTrustedWithOptions(options)
+}
 
 @main
 struct ReadLaterAIApp: App {
@@ -44,6 +51,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         loadAndApplyShortcut()
         observeShortcutChanges()
         requestNotificationPermission()
+        requestAccessibilityPermission()
         applyStoredAppearance()
     }
 
@@ -187,6 +195,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
+    /// Demande la permission Accessibilité (nécessaire pour le raccourci global).
+    /// AXIsProcessTrustedWithOptions avec kAXTrustedCheckOptionPrompt = true
+    /// affiche la popup système qui propose d'ajouter l'app dans les réglages.
+    private func requestAccessibilityPermission() {
+        requestAccessibilityTrust()
+    }
+
     // MARK: - Appearance
 
     private func applyStoredAppearance() {
@@ -194,9 +209,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         applyAppearance(mode)
     }
 
-    /// Applique le thème sur l'app ET le popover.
-    /// NSApp.appearance contrôle les fenêtres classiques mais le NSPopover
-    /// peut ne pas hériter automatiquement. On force aussi sur le contentViewController.
+    /// Applique le thème immédiatement sur le popover ouvert.
     func applyAppearance(_ mode: String) {
         let appearance: NSAppearance?
         switch mode {
@@ -208,8 +221,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             appearance = nil
         }
         NSApp.appearance = appearance
-        popover?.contentViewController?.view.window?.appearance = appearance
-        popover?.contentViewController?.view.appearance = appearance
+        // Forcer la mise à jour immédiate du popover
+        if let vc = popover?.contentViewController {
+            vc.view.appearance = appearance
+            vc.view.window?.appearance = appearance
+        }
     }
 
     private func removeShortcutMonitors() {

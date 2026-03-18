@@ -438,26 +438,14 @@ struct AISettingsSection: View {
 
 struct GeneralSettingsSection: View {
 
-    @AppStorage("summaryLanguage") private var summaryLanguage: String = "français"
     @AppStorage("shortcutKeyCode") private var shortcutKeyCode: Int = 15
     @AppStorage("shortcutModifiers") private var shortcutModifiers: Int = 0
     @AppStorage("appAppearance") private var appAppearance: String = "system"
 
     @State private var currentShortcut: ShortcutKey = .defaultShortcut
 
-    private let languages = [
-        ("français", "🇫🇷 Français"),
-        ("english", "🇬🇧 English"),
-        ("español", "🇪🇸 Español"),
-        ("deutsch", "🇩🇪 Deutsch"),
-        ("italiano", "🇮🇹 Italiano"),
-        ("português", "🇵🇹 Português"),
-    ]
-
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            languageCard
-            Divider()
             appearanceCard
             Divider()
             shortcutCard
@@ -475,51 +463,6 @@ struct GeneralSettingsSection: View {
         .onChange(of: currentShortcut) {
             shortcutKeyCode = Int(currentShortcut.keyCode)
             shortcutModifiers = Int(currentShortcut.modifiers)
-        }
-    }
-
-    // MARK: - Langue
-
-    private var languageCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label("Summary language", systemImage: "globe")
-                .font(.subheadline)
-                .fontWeight(.semibold)
-
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ], spacing: 6) {
-                ForEach(languages, id: \.0) { (code, label) in
-                    Button {
-                        summaryLanguage = code
-                    } label: {
-                        Text(label)
-                            .font(.body)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
-                            .background(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(summaryLanguage == code
-                                          ? Color.accentColor.opacity(0.12)
-                                          : Color.primary.opacity(0.03))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .stroke(summaryLanguage == code
-                                            ? Color.accentColor.opacity(0.3)
-                                            : Color.clear, lineWidth: 1)
-                            )
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .foregroundStyle(summaryLanguage == code ? .primary : .secondary)
-                }
-            }
-
-            Text("AI summaries will be generated in this language")
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
     }
 

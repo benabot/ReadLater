@@ -17,7 +17,7 @@ struct OpenAIProvider: LLMProvider {
         self.modelName = model
     }
 
-    func summarize(text: String, language: String) async throws -> Summary {
+    func summarize(text: String) async throws -> Summary {
         guard let apiKey = try KeychainService.read(for: .openAI) else {
             throw LLMError.missingAPIKey("OpenAI")
         }
@@ -40,7 +40,7 @@ struct OpenAIProvider: LLMProvider {
         let requestBody: [String: Any] = [
             "model": modelName,
             "messages": [
-                ["role": "system", "content": LLMPrompt.system(language: language)],
+                ["role": "system", "content": LLMPrompt.system()],
                 ["role": "user", "content": truncatedText]
             ],
             "temperature": 0.3,

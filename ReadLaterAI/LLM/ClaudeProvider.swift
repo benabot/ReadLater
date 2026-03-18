@@ -25,7 +25,7 @@ struct ClaudeProvider: LLMProvider {
 
     // MARK: - Summarize
 
-    func summarize(text: String, language: String) async throws -> Summary {
+    func summarize(text: String) async throws -> Summary {
         // Vérifier la clé API dans le Keychain
         guard let apiKey = try KeychainService.read(for: .claude) else {
             throw LLMError.missingAPIKey("Claude")
@@ -48,7 +48,7 @@ struct ClaudeProvider: LLMProvider {
         let requestBody: [String: Any] = [
             "model": modelName,
             "max_tokens": 1024,
-            "system": LLMPrompt.system(language: language),
+            "system": LLMPrompt.system(),
             "messages": [
                 ["role": "user", "content": truncatedText]
             ]
