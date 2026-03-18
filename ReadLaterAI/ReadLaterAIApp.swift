@@ -22,8 +22,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var modelContainer: ModelContainer!
     private var globalMonitor: Any?
     private var localMonitor: Any?
-    private var currentKeyCode: UInt16 = 0
-    private var currentModifiers: UInt = 0
     private var defaultsObserver: NSObjectProtocol?
 
     // MARK: - Launch
@@ -114,6 +112,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let storedModifiers = UInt(UserDefaults.standard.integer(forKey: "shortcutModifiers"))
         let storedKeyCode = UInt16(UserDefaults.standard.integer(forKey: "shortcutKeyCode"))
 
+        // Utiliser le défaut ⌥⌘R si rien n'est configuré
         let shortcut: ShortcutKey
         if storedModifiers != 0 {
             shortcut = ShortcutKey(keyCode: storedKeyCode, modifiers: storedModifiers)
@@ -121,16 +120,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             shortcut = .defaultShortcut
         }
 
-        guard shortcut.keyCode != currentKeyCode || shortcut.modifiers != currentModifiers else {
-            return
-        }
-
-        currentKeyCode = shortcut.keyCode
-        currentModifiers = shortcut.modifiers
+        // Toujours recréer les monitors (pas de guard)
+        // Le guard précédent empêchait la recréation quand on revenait au raccourci par défaut
         removeShortcutMonitors()
 
         let reqKey = shortcut.keyCode
         let reqMods = NSEvent.ModifierFlags(rawValue: shortcut.modifiers)
+
+        print("[ReadLater] Shortcut loaded: \(shortcut.displayString) (key=\(reqKey), mods=\(reqMods.rawValue))")
 
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard !ShortcutRecordingState.shared.isRecording else { return }
