@@ -308,33 +308,30 @@ enum ExportService {
     }
 
     // MARK: - Notes (Apple)
-    // Utilise osascript (AppleScript) pour créer une note directement dans Notes.
-    // NSSharingService ne fonctionne pas correctement dans un NSPopover sandboxé.
+    // Lance osascript en process externe pour créer une note dans Notes.
+    // NSAppleScript ne fonctionne pas en sandbox, mais Process + osascript oui
+    // car osascript tourne hors de la sandbox de l'app.
     //
-    // AppleScript est le langage de scripting inter-apps de macOS.
-    // C'est comme utiliser `child_process.exec()` en Node.js pour piloter une app externe.
+    // C'est l'équivalent de `child_process.exec('osascript ...')` en Node.js.
 
     @MainActor
     private static func exportToNotes(markdown: String) {
-        // Escape les guillemets et backslashes pour AppleScript
+        // Escape pour AppleScript : backslashes puis guillemets
         let escaped = markdown
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
 
-        let script = """
-        tell application "Notes"
-            activate
-            set newNote to make new note at folder "Notes" with properties {body:"\(escaped)"}
-        end tell
-        """
+        let script = "tell application \"Notes\" to make new note at folder \"Notes\" with properties {body:\"\(escaped)\"}"
 
-        if let appleScript = NSAppleScript(source: script) {
-            var error: NSDictionary?
-            appleScript.executeAndReturnError(&error)
-            if let error {
-                // Fallback clipboard si AppleScript échoue (sandbox)
-                copyToClipboard(markdown: markdown)
-            }
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
+        process.arguments = ["-e", script, "-e", "tell application \"Notes\" to activate"]
+
+        do {
+            try process.run()
+        } catch {
+            // Fallback : copier dans le clipboard
+            copyToClipboard(markdown: markdown)
         }
     }
 
