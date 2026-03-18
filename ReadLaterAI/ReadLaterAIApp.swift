@@ -22,7 +22,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var modelContainer: ModelContainer!
     private var globalMonitor: Any?
     private var localMonitor: Any?
-    private var defaultsObserver: NSObjectProtocol?
 
     // MARK: - Launch
 
@@ -33,8 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupModelContainer()
         setupPopover()
         setupStatusItem()
-        loadAndApplyShortcut()
-        observeShortcutChanges()
+        setupShortcut()
         requestNotificationPermission()
     }
 
@@ -106,41 +104,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // MARK: - Shortcut
+    // MARK: - Global Shortcut ⌥⌘R (hardcoded)
+    // Un seul raccourci fixe, enregistré une fois au lancement.
+    // Pas de UserDefaults, pas d'observer, pas de recreation dynamique.
 
-    private func loadAndApplyShortcut() {
-        let storedModifiers = UInt(UserDefaults.standard.integer(forKey: "shortcutModifiers"))
-        let storedKeyCode = UInt16(UserDefaults.standard.integer(forKey: "shortcutKeyCode"))
+    private func setupShortcut() {
+        let reqKey: UInt16 = 15  // kVK_ANSI_R
+        let reqMods: NSEvent.ModifierFlags = [.option, .command]
 
-        // Utiliser le défaut ⌥⌘R si rien n'est configuré
-        let shortcut: ShortcutKey
-        if storedModifiers != 0 {
-            shortcut = ShortcutKey(keyCode: storedKeyCode, modifiers: storedModifiers)
-        } else {
-            shortcut = .defaultShortcut
-        }
-
-        // Toujours recréer les monitors (pas de guard)
-        // Le guard précédent empêchait la recréation quand on revenait au raccourci par défaut
-        removeShortcutMonitors()
-
-        let reqKey = shortcut.keyCode
-        let reqMods = NSEvent.ModifierFlags(rawValue: shortcut.modifiers)
-
-        print("[ReadLater] Shortcut loaded: \(shortcut.displayString) (key=\(reqKey), mods=\(reqMods.rawValue))")
-
+        // Global — quand l'app n'est PAS au premier plan (ex: utilisateur dans Safari)
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            guard !ShortcutRecordingState.shared.isRecording else { return }
             let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            if mods == reqMods && event.keyCode == reqKey {
+            if event.keyCode == reqKey && mods == reqMods {
                 DispatchQueue.main.async { self?.togglePopover() }
             }
         }
 
+        // Local — quand l'app EST au premier plan (pour fermer avec le même raccourci)
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            guard !ShortcutRecordingState.shared.isRecording else { return event }
             let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            if mods == reqMods && event.keyCode == reqKey {
+            if event.keyCode == reqKey && mods == reqMods {
                 DispatchQueue.main.async { self?.togglePopover() }
                 return nil
             }
@@ -148,32 +131,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func observeShortcutChanges() {
-        defaultsObserver = NotificationCenter.default.addObserver(
-            forName: UserDefaults.didChangeNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor in
-                guard !ShortcutRecordingState.shared.isRecording else { return }
-                self?.loadAndApplyShortcut()
-            }
-        }
-    }
+    // MARK: - Notifications
 
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
-    private func removeShortcutMonitors() {
-        if let gm = globalMonitor { NSEvent.removeMonitor(gm); globalMonitor = nil }
-        if let lm = localMonitor { NSEvent.removeMonitor(lm); localMonitor = nil }
-    }
+    // MARK: - Cleanup
 
     func applicationWillTerminate(_ notification: Notification) {
-        removeShortcutMonitors()
-        if let obs = defaultsObserver {
-            NotificationCenter.default.removeObserver(obs)
-        }
+        if let gm = globalMonitor { NSEvent.removeMonitor(gm) }
+        if let lm = localMonitor { NSEvent.removeMonitor(lm) }
     }
 }

@@ -435,13 +435,10 @@ struct AISettingsSection: View {
 
 // MARK: - General Settings Section
 
+
 struct GeneralSettingsSection: View {
 
-    @AppStorage("shortcutKeyCode") private var shortcutKeyCode: Int = 15
-    @AppStorage("shortcutModifiers") private var shortcutModifiers: Int = 0
     @AppStorage("appAppearance") private var appAppearance: String = "system"
-
-    @State private var currentShortcut: ShortcutKey = .defaultShortcut
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -450,18 +447,6 @@ struct GeneralSettingsSection: View {
             shortcutCard
             Divider()
             aboutCard
-        }
-        .onAppear {
-            if shortcutModifiers != 0 {
-                currentShortcut = ShortcutKey(
-                    keyCode: UInt16(shortcutKeyCode),
-                    modifiers: UInt(shortcutModifiers)
-                )
-            }
-        }
-        .onChange(of: currentShortcut) {
-            shortcutKeyCode = Int(currentShortcut.keyCode)
-            shortcutModifiers = Int(currentShortcut.modifiers)
         }
     }
 
@@ -473,8 +458,6 @@ struct GeneralSettingsSection: View {
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
-            // Picker segmenté : System / Light / Dark
-            // C'est comme un groupe de radio buttons en HTML.
             Picker("", selection: $appAppearance) {
                 Text("System").tag("system")
                 Text("Light").tag("light")
@@ -484,7 +467,7 @@ struct GeneralSettingsSection: View {
         }
     }
 
-    // MARK: - Raccourci
+    // MARK: - Raccourci (lecture seule)
 
     private var shortcutCard: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -492,7 +475,18 @@ struct GeneralSettingsSection: View {
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
-            ShortcutRecorderView(shortcut: $currentShortcut)
+            Text(ShortcutKey.displayString)
+                .font(.system(.body, design: .monospaced))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.primary.opacity(0.05))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.primary.opacity(0.2), lineWidth: 1)
+                )
 
             Text("This shortcut activates the app from any application")
                 .font(.caption)
