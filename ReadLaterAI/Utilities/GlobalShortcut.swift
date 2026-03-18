@@ -3,20 +3,16 @@ import SwiftUI
 import Carbon.HIToolbox
 
 // MARK: - ShortcutKey
-// Représente un raccourci clavier personnalisable, stocké dans UserDefaults.
-// On sérialise le keyCode + les modifiers comme deux entiers.
 
-struct ShortcutKey: Codable, Equatable, Sendable {
+struct ShortcutKey: Codable, Equatable, Hashable, Sendable {
     let keyCode: UInt16
-    let modifiers: UInt  // NSEvent.ModifierFlags.rawValue
+    let modifiers: UInt
 
-    /// Le raccourci par défaut : ⌥⌘R
     static let defaultShortcut = ShortcutKey(
         keyCode: UInt16(kVK_ANSI_R),
         modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue
     )
 
-    /// Affichage lisible du raccourci (ex: "⌥⌘R")
     var displayString: String {
         var parts: [String] = []
         let flags = NSEvent.ModifierFlags(rawValue: modifiers)
@@ -28,10 +24,10 @@ struct ShortcutKey: Codable, Equatable, Sendable {
         return parts.joined()
     }
 
-    /// Nom lisible de la touche
+    /// Identifiant unique pour Picker
+    var id: String { "\(keyCode)-\(modifiers)" }
+
     private var keyName: String {
-        // Mapper les keyCodes courants vers des noms lisibles.
-        // Les keyCodes sont hérités de l'API Carbon (layout QWERTY).
         switch Int(keyCode) {
         case kVK_ANSI_A: "A"
         case kVK_ANSI_B: "B"
@@ -59,72 +55,74 @@ struct ShortcutKey: Codable, Equatable, Sendable {
         case kVK_ANSI_X: "X"
         case kVK_ANSI_Y: "Y"
         case kVK_ANSI_Z: "Z"
-        case kVK_ANSI_0: "0"
-        case kVK_ANSI_1: "1"
-        case kVK_ANSI_2: "2"
-        case kVK_ANSI_3: "3"
-        case kVK_ANSI_4: "4"
-        case kVK_ANSI_5: "5"
-        case kVK_ANSI_6: "6"
-        case kVK_ANSI_7: "7"
-        case kVK_ANSI_8: "8"
-        case kVK_ANSI_9: "9"
-        case kVK_Space: "Espace"
-        case kVK_Return: "↩"
-        case kVK_Tab: "⇥"
-        case kVK_F1: "F1"
-        case kVK_F2: "F2"
-        case kVK_F3: "F3"
-        case kVK_F4: "F4"
-        case kVK_F5: "F5"
-        case kVK_F6: "F6"
-        case kVK_F7: "F7"
-        case kVK_F8: "F8"
+        case kVK_Space: String(localized: "Space")
         default: "?\(keyCode)"
         }
     }
 }
 
-// MARK: - ShortcutRecorderView
-// Vue SwiftUI qui permet d'enregistrer un nouveau raccourci clavier.
-// L'utilisateur clique sur le champ, puis appuie sur la combinaison souhaitée.
-// C'est comme les "hotkey recorders" dans Alfred, Raycast, etc.
+// MARK: - ShortcutRecordingState
+
+@MainActor
+final class ShortcutRecordingState {
+    static let shared = ShortcutRecordingState()
+    var isRecording = false
+    private init() {}
+}
+
+// MARK: - Predefined Shortcuts
+// Liste de raccourcis prédéfinis que l'utilisateur peut choisir dans un menu.
+// C'est plus fiable qu'un recorder custom car aucun monitor NSEvent n'est
+// nécessaire, ce qui évite les conflits avec l'AppDelegate.
+
+enum PredefinedShortcuts {
+    static let all: [ShortcutKey] = [
+        // ⌥⌘ + lettre
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_R), modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_L), modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_B), modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_S), modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_K), modifiers: NSEvent.ModifierFlags([.option, .command]).rawValue),
+        // ⌃⌥ + lettre
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_R), modifiers: NSEvent.ModifierFlags([.control, .option]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_L), modifiers: NSEvent.ModifierFlags([.control, .option]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_B), modifiers: NSEvent.ModifierFlags([.control, .option]).rawValue),
+        // ⇧⌘ + lettre
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_R), modifiers: NSEvent.ModifierFlags([.shift, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_L), modifiers: NSEvent.ModifierFlags([.shift, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_B), modifiers: NSEvent.ModifierFlags([.shift, .command]).rawValue),
+        // ⌃⇧ + lettre
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_R), modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_L), modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue),
+        // ⌃⌘ + lettre
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_R), modifiers: NSEvent.ModifierFlags([.control, .command]).rawValue),
+        ShortcutKey(keyCode: UInt16(kVK_ANSI_L), modifiers: NSEvent.ModifierFlags([.control, .command]).rawValue),
+    ]
+}
+
+// MARK: - ShortcutRecorderView (Picker-based)
+// Au lieu d'un recorder qui capture les touches (source de bugs avec NSPopover),
+// on utilise un simple menu déroulant avec des raccourcis prédéfinis.
+// C'est le pattern utilisé par CleanShot, Paste, Spark, etc.
 
 struct ShortcutRecorderView: View {
     @Binding var shortcut: ShortcutKey
-    @State private var isRecording = false
-    @State private var monitor: Any?
 
     var body: some View {
         HStack(spacing: 8) {
-            // Zone d'affichage / enregistrement du raccourci
-            Text(isRecording ? "Appuyez sur un raccourci…" : shortcut.displayString)
-                .font(.system(.body, design: .monospaced))
-                .foregroundStyle(isRecording ? .orange : .primary)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 5)
-                .frame(minWidth: 120)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(isRecording ? Color.orange.opacity(0.1) : Color.primary.opacity(0.05))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 6)
-                        .stroke(isRecording ? Color.orange : Color.primary.opacity(0.2), lineWidth: 1)
-                )
-                .onTapGesture {
-                    startRecording()
+            // Menu déroulant avec les raccourcis disponibles.
+            // Picker en SwiftUI = <select> en HTML.
+            Picker("", selection: $shortcut) {
+                ForEach(PredefinedShortcuts.all, id: \.id) { preset in
+                    Text(preset.displayString)
+                        .font(.system(.body, design: .monospaced))
+                        .tag(preset)
                 }
-
-            if isRecording {
-                Button("Annuler") {
-                    stopRecording()
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-                .font(.caption)
             }
+            .pickerStyle(.menu)
+            .frame(minWidth: 130)
 
+            // Bouton reset
             Button {
                 shortcut = .defaultShortcut
             } label: {
@@ -133,43 +131,7 @@ struct ShortcutRecorderView: View {
             }
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
-            .help("Réinitialiser au raccourci par défaut (⌥⌘R)")
+            .help("Reset to default (⌥⌘R)")
         }
-    }
-
-    private func startRecording() {
-        isRecording = true
-
-        // Écouter le prochain événement clavier
-        monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-
-            // Ignorer les touches sans modificateur (sauf les touches F)
-            let isFKey = (kVK_F1...kVK_F8).contains(Int(event.keyCode))
-            guard !modifiers.isEmpty || isFKey else {
-                return event
-            }
-
-            // Ignorer si seuls les modificateurs sont pressés (pas de lettre)
-            let modOnlyKeys: Set<UInt16> = [54, 55, 56, 57, 58, 59, 60, 61, 62, 63]
-            guard !modOnlyKeys.contains(event.keyCode) else {
-                return event
-            }
-
-            shortcut = ShortcutKey(
-                keyCode: event.keyCode,
-                modifiers: modifiers.rawValue
-            )
-            stopRecording()
-            return nil  // Consommer l'événement
-        }
-    }
-
-    private func stopRecording() {
-        isRecording = false
-        if let monitor {
-            NSEvent.removeMonitor(monitor)
-        }
-        monitor = nil
     }
 }

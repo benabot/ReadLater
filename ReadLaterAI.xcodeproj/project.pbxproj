@@ -19,21 +19,26 @@
 		86B2C6382884529A2323A047 /* HelpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E320462D625CB0AF7950A6AC /* HelpView.swift */; };
 		89104B50CF19488EB0266CD1 /* OllamaProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAAFCC422BF145E10D0EE682 /* OllamaProvider.swift */; };
 		8928758915FF880B86F952C6 /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8E96925B1649BFE44E17BD0 /* Article.swift */; };
+		8B6E92B726CC89F88543EAD3 /* GlassStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13DF393AEC9CCDBF4711117B /* GlassStyle.swift */; };
 		8CF863C17BFEF027D5EA2CD1 /* SafariImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E5D6E71F81F14F521057B46 /* SafariImporter.swift */; };
 		9E31409288F01C01A99F5053 /* ClipboardMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 945CE6D4C4FF294143E99257 /* ClipboardMonitor.swift */; };
 		A388BD95209EDB3020863CEF /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = C7089482B4815FA9342B24A4 /* SwiftSoup */; };
 		BB116950F677EA6C65BE1EF2 /* ArticleExtractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 057F06B1786D2750330FC7A9 /* ArticleExtractor.swift */; };
 		BFA813622119BCFE03748FD2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 82FF68BF6EC82622F9A5A61D /* Assets.xcassets */; };
+		C774D1DCD608C41555C666C4 /* icon.svg in Resources */ = {isa = PBXBuildFile; fileRef = 046D6896F804DFF099313E78 /* icon.svg */; };
 		D12EB5246FDBCD6FD012EC91 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45D3F7CBB2BF0A57C5EB9F44 /* OnboardingView.swift */; };
 		DB34F14B71E26EECA7098961 /* SKILL.md in Resources */ = {isa = PBXBuildFile; fileRef = 5E9854D42EB7398F1D980540 /* SKILL.md */; };
+		E198EE2E4547A3F23D43EFA8 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D9D195938CBDEFBFF3F67F71 /* Localizable.strings */; };
 		E908CA342C24A9724AFB6D34 /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8343AF51293590EE82248F85 /* PreferencesView.swift */; };
 		EAA7F5FEDB27E51A6CFA077D /* SafariImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7BD323786370BFFF38E3064 /* SafariImportView.swift */; };
 		F5B9F2F3AB7EE0D16F1C41E4 /* LLMProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403885EEC600242FB23839A8 /* LLMProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		046D6896F804DFF099313E78 /* icon.svg */ = {isa = PBXFileReference; path = icon.svg; sourceTree = "<group>"; };
 		057F06B1786D2750330FC7A9 /* ArticleExtractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArticleExtractor.swift; sourceTree = "<group>"; };
 		0E5D6E71F81F14F521057B46 /* SafariImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariImporter.swift; sourceTree = "<group>"; };
+		13DF393AEC9CCDBF4711117B /* GlassStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassStyle.swift; sourceTree = "<group>"; };
 		2376B018000266E58EA4A4A5 /* GlobalShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalShortcut.swift; sourceTree = "<group>"; };
 		403885EEC600242FB23839A8 /* LLMProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMProvider.swift; sourceTree = "<group>"; };
 		45D3F7CBB2BF0A57C5EB9F44 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -51,7 +56,9 @@
 		BA9A92BC68EB58F46896EEBD /* ReadLaterAIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadLaterAIApp.swift; sourceTree = "<group>"; };
 		C622F4CDFEFD48F18B66D00A /* ExportMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportMenuView.swift; sourceTree = "<group>"; };
 		D7BD323786370BFFF38E3064 /* SafariImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariImportView.swift; sourceTree = "<group>"; };
+		D9D195938CBDEFBFF3F67F71 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E320462D625CB0AF7950A6AC /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
+		EA6C2182C2CECEA35852F877 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		F3ADFA44FD4775D156C5929F /* ReadLaterAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadLaterAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAAFCC422BF145E10D0EE682 /* OllamaProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OllamaProvider.swift; sourceTree = "<group>"; };
 		FC36821333C82C01F5958318 /* OpenAIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIProvider.swift; sourceTree = "<group>"; };
@@ -141,6 +148,9 @@
 			isa = PBXGroup;
 			children = (
 				82FF68BF6EC82622F9A5A61D /* Assets.xcassets */,
+				046D6896F804DFF099313E78 /* icon.svg */,
+				EA6C2182C2CECEA35852F877 /* Info.plist */,
+				D9D195938CBDEFBFF3F67F71 /* Localizable.strings */,
 				6823D1F58D1D26790E95463B /* ReadLaterAI.entitlements */,
 			);
 			path = Resources;
@@ -149,6 +159,7 @@
 		90A27044BCEA077CB704D8A6 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				13DF393AEC9CCDBF4711117B /* GlassStyle.swift */,
 				2376B018000266E58EA4A4A5 /* GlobalShortcut.swift */,
 			);
 			path = Utilities;
@@ -210,6 +221,7 @@
 			knownRegions = (
 				Base,
 				en,
+				fr,
 			);
 			mainGroup = 3227A6489757D42E66D8AFA8;
 			minimizedProjectReferenceProxies = 1;
@@ -233,7 +245,9 @@
 			files = (
 				BFA813622119BCFE03748FD2 /* Assets.xcassets in Resources */,
 				0B1CD2E539DAED878D43ADB6 /* CLAUDE.md in Resources */,
+				E198EE2E4547A3F23D43EFA8 /* Localizable.strings in Resources */,
 				DB34F14B71E26EECA7098961 /* SKILL.md in Resources */,
+				C774D1DCD608C41555C666C4 /* icon.svg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,6 +265,7 @@
 				60719C63BA2FE3FD2E34B099 /* ContentView.swift in Sources */,
 				3F059BCF959123F373772283 /* ExportMenuView.swift in Sources */,
 				0F651BCC268A3CA6DD572E1C /* ExportService.swift in Sources */,
+				8B6E92B726CC89F88543EAD3 /* GlassStyle.swift in Sources */,
 				36258301286B4702F2CD93DA /* GlobalShortcut.swift in Sources */,
 				86B2C6382884529A2323A047 /* HelpView.swift in Sources */,
 				07CBB519402E8D850D6A02AE /* KeychainService.swift in Sources */,
@@ -277,6 +292,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ReadLaterAI/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "ReadLater AI";
 				INFOPLIST_KEY_LSUIElement = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -338,6 +354,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_CFBundleDevelopmentRegion = en;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -400,6 +417,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_CFBundleDevelopmentRegion = en;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -421,6 +439,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ReadLaterAI/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "ReadLater AI";
 				INFOPLIST_KEY_LSUIElement = YES;
 				LD_RUNPATH_SEARCH_PATHS = (

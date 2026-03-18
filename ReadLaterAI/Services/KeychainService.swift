@@ -49,13 +49,13 @@ enum KeychainService {
         var errorDescription: String? {
             switch self {
             case .saveFailed(let status):
-                "Impossible de sauvegarder dans le Keychain (erreur \(status))"
+                String(localized: "Unable to save to Keychain (error \(status))")
             case .readFailed(let status):
-                "Impossible de lire le Keychain (erreur \(status))"
+                String(localized: "Unable to read Keychain (error \(status))")
             case .deleteFailed(let status):
-                "Impossible de supprimer du Keychain (erreur \(status))"
+                String(localized: "Unable to delete from Keychain (error \(status))")
             case .dataConversionFailed:
-                "Impossible de convertir les données du Keychain"
+                String(localized: "Unable to convert Keychain data")
             }
         }
     }

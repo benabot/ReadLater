@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ExportMenuView: View {
     let article: Article
+    var onDelete: (() -> Void)? = nil
     @State private var exportError: String?
     @State private var showCopiedFeedback: Bool = false
 
@@ -32,7 +33,7 @@ struct ExportMenuView: View {
             Button {
                 ExportService.copyToClipboard(markdown: article.url)
             } label: {
-                Label("Copier l'URL", systemImage: "link")
+                Label("Copy URL", systemImage: "link")
             }
 
             // Ouvrir dans le navigateur
@@ -41,7 +42,17 @@ struct ExportMenuView: View {
                     NSWorkspace.shared.open(url)
                 }
             } label: {
-                Label("Ouvrir dans le navigateur", systemImage: "safari")
+                Label("Open in browser", systemImage: "safari")
+            }
+
+            // Supprimer
+            if let onDelete {
+                Divider()
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
             }
         }
     }

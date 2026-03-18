@@ -1,22 +1,16 @@
 import SwiftUI
 
-// MARK: - HelpView
-// Page mode d'emploi inline (dans le popover).
-// Accessible via un bouton "?" dans le footer.
-// Présente les raccourcis et gestes disponibles dans l'app.
-
 struct HelpView: View {
 
     let onDismiss: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
-                Label("Mode d'emploi", systemImage: "questionmark.circle.fill")
+                Label("User Guide", systemImage: "questionmark.circle.fill")
                     .font(.headline)
                 Spacer()
-                Button("Retour") { onDismiss() }
+                Button("Back") { onDismiss() }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
             }
@@ -27,83 +21,79 @@ struct HelpView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     helpSection(
-                        title: "Ajouter un article",
+                        title: String(localized: "Add an article"),
                         icon: "plus.circle",
                         items: [
-                            HelpItem(gesture: "Coller une URL", description: "Collez une URL dans le champ en haut et validez"),
-                            HelpItem(gesture: "Copier une URL", description: "Copiez une URL dans votre navigateur — une bannière bleue apparaîtra pour l'ajouter"),
-                            HelpItem(gesture: "Import Safari", description: "Cliquez sur l'icône Safari dans le footer pour importer votre Reading List"),
+                            HelpItem(gesture: String(localized: "Paste a URL"), description: String(localized: "Paste a URL in the field above and submit")),
+                            HelpItem(gesture: String(localized: "Copy a URL"), description: String(localized: "Copy a URL in your browser — a blue banner will appear to add it")),
+                            HelpItem(gesture: String(localized: "Safari Import"), description: String(localized: "Click the Safari icon in the footer to import your Reading List")),
                         ]
                     )
 
                     helpSection(
-                        title: "Résumer un article",
+                        title: String(localized: "Summarize an article"),
                         icon: "sparkles",
                         items: [
-                            HelpItem(gesture: "Bouton ✨", description: "Cliquez sur l'icône sparkles à droite d'un article pour lancer le résumé IA"),
-                            HelpItem(gesture: "Cliquer sur l'article", description: "Cliquez sur un article résumé pour afficher/masquer le résumé complet"),
+                            HelpItem(gesture: String(localized: "✨ Button"), description: String(localized: "Click the sparkles icon to the right of an article to start the AI summary")),
+                            HelpItem(gesture: String(localized: "Click on the article"), description: String(localized: "Click on a summarized article to show/hide the full summary")),
                         ]
                     )
 
                     helpSection(
-                        title: "Exporter",
+                        title: String(localized: "Export"),
                         icon: "square.and.arrow.up",
                         items: [
-                            HelpItem(gesture: "Clic droit", description: "Faites un clic droit sur un article pour ouvrir le menu d'export"),
-                            HelpItem(gesture: "Apps supportées", description: "Bear, iA Writer, Obsidian, Craft, Ulysses, Evernote, Notes, Clipboard"),
+                            HelpItem(gesture: String(localized: "Right-click"), description: String(localized: "Right-click on an article to open the export menu")),
+                            HelpItem(gesture: String(localized: "Supported apps"), description: "Bear, iA Writer, Obsidian, Craft, Ulysses, Evernote, Notes, Clipboard"),
                         ]
                     )
 
                     helpSection(
-                        title: "Gérer les articles",
+                        title: String(localized: "Manage articles"),
                         icon: "list.bullet",
                         items: [
-                            HelpItem(gesture: "Supprimer", description: "Glissez un article vers la gauche ou utilisez le clic droit"),
+                            HelpItem(gesture: String(localized: "Delete"), description: String(localized: "Swipe an article to the left or use right-click")),
                         ]
                     )
 
                     helpSection(
-                        title: "Indicateurs",
+                        title: String(localized: "Indicators"),
                         icon: "info.circle",
                         items: [
-                            HelpItem(gesture: "✅ Vert", description: "Article résumé avec succès"),
-                            HelpItem(gesture: "⚠️ Orange", description: "Contenu non extrait (site protégé, timeout, etc.)"),
-                            HelpItem(gesture: "✨ Violet", description: "Résumé disponible — cliquez pour lancer"),
+                            HelpItem(gesture: String(localized: "✅ Green"), description: String(localized: "Article summarized successfully")),
+                            HelpItem(gesture: String(localized: "⚠️ Orange"), description: String(localized: "Content not extracted (protected site, timeout, etc.)")),
+                            HelpItem(gesture: String(localized: "✨ Purple"), description: String(localized: "Summary available — click to start")),
                         ]
                     )
 
                     helpSection(
-                        title: "Préférences",
+                        title: "Preferences",
                         icon: "gearshape",
                         items: [
-                            HelpItem(gesture: "Provider IA", description: "Choisissez entre Ollama (local/gratuit), Claude ou OpenAI"),
-                            HelpItem(gesture: "Clés API", description: "Configurez vos clés API — elles sont chiffrées dans le Keychain macOS"),
-                            HelpItem(gesture: "Langue", description: "Choisissez la langue de génération des résumés"),
+                            HelpItem(gesture: String(localized: "AI Provider"), description: String(localized: "Choose between Ollama (local/free), Claude or OpenAI")),
+                            HelpItem(gesture: String(localized: "API Keys"), description: String(localized: "Configure your API keys — they are encrypted in macOS Keychain")),
+                            HelpItem(gesture: String(localized: "Language"), description: String(localized: "Choose the language for summary generation")),
                         ]
                     )
 
-                    // Lien revoir l'onboarding
                     Button {
-                        // Reset le flag d'onboarding pour le revoir
                         UserDefaults.standard.set(false, forKey: "hasSeenOnboarding")
                         onDismiss()
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "arrow.counterclockwise")
-                            Text("Revoir la présentation de bienvenue")
+                            Text("Review the welcome presentation")
                         }
                         .font(.caption)
                         .foregroundStyle(Color.accentColor)
-                        }
-                        .buttonStyle(.plain)
+                    }
+                    .buttonStyle(.plain)
                     .padding(.top, 4)
                 }
                 .padding(14)
             }
         }
     }
-
-    // MARK: - Section
 
     private func helpSection(title: String, icon: String, items: [HelpItem]) -> some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -119,7 +109,6 @@ struct HelpView: View {
                             .fontWeight(.medium)
                             .frame(width: 110, alignment: .trailing)
                             .foregroundStyle(Color.accentColor)
-
                         Text(item.description)
                             .font(.callout)
                             .foregroundStyle(.secondary)
@@ -129,8 +118,6 @@ struct HelpView: View {
         }
     }
 }
-
-// MARK: - HelpItem
 
 private struct HelpItem: Identifiable {
     let id = UUID()

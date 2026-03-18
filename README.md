@@ -8,72 +8,71 @@
   <img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT License">
 </p>
 
-**App macOS menu bar qui capture des URLs, extrait le contenu d'articles, génère des résumés IA et exporte vers vos apps de notes.**
+**A native macOS menu bar app that captures URLs, extracts article content, generates AI summaries and exports to your note-taking apps.**
 
-ReadLater AI vit dans votre barre de menus — pas d'icône dans le Dock, pas de fenêtre encombrante. Collez une URL, l'app extrait le contenu, le résume avec l'IA de votre choix et l'exporte en Markdown vers Bear, Obsidian, iA Writer ou 5 autres apps.
+ReadLater AI lives in your menu bar — no Dock icon, no window clutter. Paste a URL, the app extracts the content, summarizes it with the AI of your choice, and exports formatted Markdown to Bear, Obsidian, iA Writer and 5 more apps.
 
 ---
 
-## Fonctionnalités
+## Features
 
-### Capture d'articles
-- **Ajout par URL** — collez une URL, le contenu est extrait automatiquement (titre, texte, nombre de mots)
-- **Détection clipboard** — copiez une URL n'importe où, une bannière propose de l'ajouter
-- **Import Safari** — importez votre Reading List Safari en un clic
+### Article Capture
+- **URL input** — paste a URL, content is extracted automatically (title, text, word count)
+- **Clipboard detection** — copy a URL anywhere, a banner offers to add it
+- **Safari import** — import your Safari Reading List in one click
 
-### Résumé IA
-- **Multi-provider** — Claude (Anthropic), OpenAI ou Ollama (local, gratuit)
-- **Résumé structuré** — TL;DR, points clés, temps de lecture estimé, tags auto-générés
-- **Multilingue** — résumés en français, anglais, espagnol, allemand, italien, portugais
+### AI Summary
+- **Multi-provider** — Claude (Anthropic), OpenAI, or Ollama (local, free, private)
+- **Structured summary** — TL;DR, key points, estimated reading time, auto-generated tags
+- **Multilingual** — summaries in French, English, Spanish, German, Italian, Portuguese
+- **Notification** — get notified when a summary is ready
 
 ### Export
-- **8 apps supportées** — Bear, iA Writer, Obsidian, Craft, Ulysses, Evernote, Apple Notes, Clipboard
-- **Format Markdown** — titre, source, résumé, points clés, tags
-- **Clic droit** — menu contextuel sur chaque article pour exporter
+- **8 supported apps** — Bear, iA Writer, Obsidian, Craft, Ulysses, Evernote, Apple Notes, Clipboard
+- **Markdown format** — title, source, summary, key points, tags
+- **Export button** — visible share icon on summarized articles + right-click context menu
 
 ### Interface
-- **Menu bar only** — vit dans la barre de menus, pas d'icône Dock
-- **Onboarding** — présentation guidée au premier lancement
-- **Mode d'emploi** — aide intégrée accessible à tout moment
-- **Préférences** — provider IA, clés API (Keychain), langue, raccourci clavier
+- **Menu bar only** — lives in the menu bar, no Dock icon (LSUIElement)
+- **Global shortcut** — ⌥⌘R (customizable) to toggle the popover from any app
+- **Liquid glass UI** — translucent materials, gradient borders, glass pills
+- **Search & filters** — search by title/URL/tags/summary, filter by All/Unread/Summarized/Failed
+- **Delete articles** — via right-click context menu or export menu
+- **Onboarding** — guided welcome on first launch
+- **Help** — built-in user guide
+- **i18n** — English (default) + French, auto-detected from OS language
 
 ---
 
 ## Installation
 
-### Prérequis
+### Requirements
 
-- macOS 14 Sonoma ou supérieur
-- Xcode 16+ (pour compiler)
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen) (optionnel, pour régénérer le projet)
+- macOS 14 Sonoma or later
+- Xcode 16+ (to build)
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen) (to regenerate the project)
 
-### Compilation
+### Build
 
 ```bash
 git clone https://github.com/benabot/ReadLater.git
-cd ReadLater
+cd ReadLater/ReadlLater
 
-# Ouvrir dans Xcode
-open ReadLaterAI.xcodeproj
-
-# Ou compiler depuis le terminal
-xcodebuild -project ReadLaterAI.xcodeproj -scheme ReadLaterAI -configuration Debug build
-```
-
-### Avec XcodeGen (optionnel)
-
-Si vous modifiez la structure du projet :
-
-```bash
-brew install xcodegen
+# Generate Xcode project
 xcodegen generate
+
+# Build
+xcodebuild -project ReadLaterAI.xcodeproj -scheme ReadLaterAI -configuration Debug build
+
+# Run
+open "$(find ~/Library/Developer/Xcode/DerivedData/ReadLaterAI-*/Build/Products/Debug -name 'ReadLater AI.app' -maxdepth 1)"
 ```
 
 ---
 
-## Configuration des providers IA
+## AI Provider Setup
 
-### Ollama (gratuit, local)
+### Ollama (free, local, private)
 
 ```bash
 brew install ollama
@@ -81,21 +80,21 @@ ollama pull llama3.2
 ollama serve
 ```
 
-Aucune clé API nécessaire. Les données restent sur votre machine.
+No API key needed. Your data stays on your machine.
 
 ### Claude (Anthropic)
 
-1. Créez un compte sur [console.anthropic.com](https://console.anthropic.com)
-2. Générez une clé API
-3. Dans l'app : Préférences → IA → collez votre clé Claude
+1. Create an account at [console.anthropic.com](https://console.anthropic.com)
+2. Generate an API key
+3. In the app: Preferences → AI → paste your Claude key
 
 ### OpenAI
 
-1. Créez un compte sur [platform.openai.com](https://platform.openai.com)
-2. Générez une clé API
-3. Dans l'app : Préférences → IA → collez votre clé OpenAI
+1. Create an account at [platform.openai.com](https://platform.openai.com)
+2. Generate an API key
+3. In the app: Preferences → AI → paste your OpenAI key
 
-> Les clés API sont stockées dans le Keychain macOS (chiffré), jamais en clair.
+> API keys are stored in the macOS Keychain (encrypted), never in plain text.
 
 ---
 
@@ -103,95 +102,86 @@ Aucune clé API nécessaire. Les données restent sur votre machine.
 
 ```
 ReadLaterAI/
-├── ReadLaterAIApp.swift          # Point d'entrée, MenuBarExtra
+├── ReadLaterAIApp.swift          # @main + AppDelegate (NSStatusBar + NSPopover)
 ├── Models/
-│   └── Article.swift             # @Model SwiftData + Summary
+│   └── Article.swift             # @Model SwiftData + Summary Codable
 ├── Views/
-│   ├── ContentView.swift         # Vue principale, navigation inline
-│   ├── SafariImportView.swift    # Import Safari Reading List
-│   ├── PreferencesView.swift     # Préférences (IA, Général)
-│   ├── OnboardingView.swift      # Bienvenue au premier lancement
-│   ├── HelpView.swift            # Mode d'emploi
-│   └── ExportMenuView.swift      # Menu contextuel d'export
+│   ├── ContentView.swift         # Main view, search, filters, article rows
+│   ├── SafariImportView.swift    # Safari Reading List import
+│   ├── PreferencesView.swift     # Tabbed prefs (AI / General)
+│   ├── OnboardingView.swift      # 4-page welcome
+│   ├── HelpView.swift            # User guide
+│   └── ExportMenuView.swift      # Context menu + export button
 ├── Services/
-│   ├── ArticleExtractor.swift    # Fetch HTML + SwiftSoup
-│   ├── ClipboardMonitor.swift    # Détection URLs clipboard
-│   ├── SafariImporter.swift      # Lecture Bookmarks.plist
-│   ├── KeychainService.swift     # CRUD Keychain natif
-│   └── ExportService.swift       # Export vers 8 apps
+│   ├── ArticleExtractor.swift    # HTML fetch + SwiftSoup parsing (actor)
+│   ├── ClipboardMonitor.swift    # NSPasteboard polling (@Observable)
+│   ├── SafariImporter.swift      # Bookmarks.plist reader (actor)
+│   ├── KeychainService.swift     # Native Keychain CRUD (enum)
+│   └── ExportService.swift       # 8 export targets
 ├── LLM/
-│   ├── LLMProvider.swift         # Protocol + prompt + parser
+│   ├── LLMProvider.swift         # Protocol + prompt + JSON parser
 │   ├── ClaudeProvider.swift      # Anthropic API
 │   ├── OpenAIProvider.swift      # OpenAI API
 │   └── OllamaProvider.swift      # Ollama local
-└── Utilities/
-    └── GlobalShortcut.swift      # Raccourci clavier personnalisable
+├── Utilities/
+│   ├── GlobalShortcut.swift      # Predefined shortcut picker + ShortcutKey
+│   └── GlassStyle.swift          # Liquid glass design system
+└── Resources/
+    ├── Info.plist                 # Anti-termination keys
+    ├── ReadLaterAI.entitlements   # Sandbox + network
+    ├── Assets.xcassets/           # App icon (7 PNG sizes)
+    ├── icon.svg                   # Source SVG
+    └── fr.lproj/Localizable.strings  # 160+ French translations
 ```
 
-### Stack technique
+### Tech Stack
 
-| Couche | Technologie |
-|--------|-------------|
-| UI | SwiftUI (MenuBarExtra) |
-| Persistance | SwiftData (SQLite) |
-| Parsing HTML | [SwiftSoup](https://github.com/scinfu/SwiftSoup) |
-| Réseau | URLSession async/await |
-| Sécurité | Keychain natif |
+| Layer | Technology |
+|-------|-----------|
+| UI | SwiftUI (NSPopover) |
+| Persistence | SwiftData (SQLite) |
+| HTML Parsing | [SwiftSoup](https://github.com/scinfu/SwiftSoup) |
+| Networking | URLSession async/await |
+| Security | Native Keychain |
 | Export | URL schemes + NSSharingService |
+| Notifications | UNUserNotificationCenter |
 
-### Choix techniques
+### Technical Choices
 
 - **Swift 6 strict concurrency** — actors, @Sendable, @MainActor
-- **@Observable** (pas ObservableObject) — réactivité moderne
-- **Zéro dépendance tierce** sauf SwiftSoup pour le parsing HTML
-- **Pas de Combine** — tout en async/await
-- **Sandbox activée** — compatible App Store
-
----
-
-## Utilisation
-
-### Ajouter un article
-1. Cliquez sur l'icône 📄🔍 dans la barre de menus
-2. Collez une URL dans le champ en haut → le contenu est extrait automatiquement
-3. Ou copiez une URL n'importe où → une bannière bleue propose de l'ajouter
-
-### Résumer avec l'IA
-1. Cliquez sur l'icône ✨ à droite d'un article
-2. Le résumé apparaît : TL;DR, points clés, temps de lecture, tags
-3. Cliquez sur l'article pour afficher/masquer le résumé
-
-### Exporter
-1. Faites un **clic droit** sur un article
-2. Choisissez l'app de destination (Bear, Obsidian, iA Writer, etc.)
-3. Le contenu est exporté en Markdown formaté
-
-### Import Safari
-1. Cliquez sur l'icône Safari dans le footer
-2. Sélectionnez `~/Library/Safari/Bookmarks.plist`
-3. Choisissez les articles à importer → le contenu est extrait en batch
+- **NSStatusBar + NSPopover** — full programmatic control (not MenuBarExtra)
+- **@Observable** (not ObservableObject) — modern reactivity
+- **Zero third-party deps** except SwiftSoup for HTML parsing
+- **No Combine** — pure async/await
+- **App Sandbox enabled** — App Store compatible
+- **Anti-termination** — Info.plist keys + ProcessInfo + applicationShouldTerminate
 
 ---
 
 ## Roadmap
 
-- [x] Squelette menu bar + SwiftData
-- [x] Capture d'URL + extraction HTML
-- [x] LLM multi-provider (Claude, OpenAI, Ollama)
-- [x] Export 8 apps (Bear, iA Writer, Obsidian, Craft, Ulysses, Evernote, Notes, Clipboard)
-- [x] Préférences (provider, clés API, langue, raccourci)
-- [x] Onboarding + mode d'emploi
-- [ ] Raccourci global fonctionnel (toggle popover via NSStatusBar)
-- [ ] Recherche et filtres dans la liste d'articles
-- [ ] Icône app custom
+- [x] Menu bar skeleton + NSPopover
+- [x] URL capture + HTML extraction (SwiftSoup)
+- [x] Multi-provider LLM (Claude, OpenAI, Ollama)
+- [x] Export to 8 apps
+- [x] Preferences (provider, API keys, language, shortcut)
+- [x] Onboarding + help
+- [x] Liquid glass UI
+- [x] Search + filters (All/Unread/Summarized/Failed)
+- [x] Global shortcut (⌥⌘R, customizable)
+- [x] Custom app icon
+- [x] i18n English + French
+- [x] Delete articles
+- [x] Notifications when summary is ready
 - [ ] Distribution via Gumroad / Mac App Store
+- [ ] Freemium (free tier with Ollama, Pro with cloud providers)
 
 ---
 
-## Licence
+## License
 
-MIT — voir [LICENSE](LICENSE)
+MIT — see [LICENSE](LICENSE)
 
 ---
 
-Créé par [beabot.fr](https://beabot.fr)
+Built by [beabot.fr](https://beabot.fr)

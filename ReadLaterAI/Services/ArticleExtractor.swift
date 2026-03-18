@@ -141,7 +141,7 @@ actor ArticleExtractor {
             return cleaned ?? title
         }
 
-        return "Sans titre"
+        return String(localized: "Untitled")
     }
 
     // MARK: - Suppression du bruit HTML

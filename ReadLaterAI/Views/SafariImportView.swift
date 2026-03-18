@@ -27,10 +27,10 @@ struct SafariImportView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Label("Importer depuis Safari", systemImage: "safari")
+                Label("Import from Safari", systemImage: "safari")
                     .font(.headline)
                 Spacer()
-                Button("Retour") { onDismiss() }
+                Button("Back") { onDismiss() }
                     .buttonStyle(.plain)
                     .foregroundStyle(.secondary)
             }
@@ -40,20 +40,20 @@ struct SafariImportView: View {
 
             // Contenu
             if isLoading {
-                ProgressView("Lecture de la Reading List…")
+                ProgressView("Reading the Reading List…")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if let errorMessage {
                 ContentUnavailableView {
-                    Label("Erreur", systemImage: "exclamationmark.triangle")
+                    Label("Error", systemImage: "exclamationmark.triangle")
                 } description: {
                     Text(errorMessage)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if items.isEmpty {
                 ContentUnavailableView {
-                    Label("Aucun article", systemImage: "tray")
+                    Label("No articles found", systemImage: "tray")
                 } description: {
-                    Text("Votre Reading List Safari est vide")
+                    Text("Your Safari Reading List is empty")
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -101,7 +101,7 @@ struct SafariImportView: View {
                         }
 
                         if isAlreadyImported(url: item.url) {
-                            Label("Déjà importé", systemImage: "checkmark.circle")
+                            Label("Already imported", systemImage: "checkmark.circle")
                                 .font(.caption2)
                                 .foregroundStyle(.green)
                         }
@@ -124,13 +124,13 @@ struct SafariImportView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
-                Button("Tout") {
+                Button("All") {
                     selectedIDs = Set(items.map(\.id))
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.blue)
 
-                Button("Aucun") {
+                Button("None") {
                     selectedIDs.removeAll()
                 }
                 .buttonStyle(.plain)
@@ -139,11 +139,11 @@ struct SafariImportView: View {
 
             Spacer()
 
-            Text("\(selectedIDs.count) sélectionné\(selectedIDs.count > 1 ? "s" : "")")
+            Text("\(selectedIDs.count) selected")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
 
-            Button("Importer") {
+            Button("Import") {
                 importSelected()
             }
             .buttonStyle(.borderedProminent)

@@ -7,8 +7,8 @@ struct PreferencesView: View {
     let onDismiss: () -> Void
 
     enum Tab: String, CaseIterable {
-        case ai = "IA"
-        case general = "Général"
+        case ai = "AI"
+        case general = "General"
 
         var icon: String {
             switch self {
@@ -25,9 +25,9 @@ struct PreferencesView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
-            Divider()
+            GlassDivider()
             tabBar
-            Divider()
+            GlassDivider()
 
             // Contenu selon l'onglet — PAS dans un switch à l'intérieur d'un ScrollView
             // (le switch dans ScrollView peut causer des problèmes de navigation).
@@ -59,10 +59,10 @@ struct PreferencesView: View {
 
     private var header: some View {
         HStack {
-            Label("Préférences", systemImage: "gearshape.fill")
+            Label("Preferences", systemImage: "gearshape.fill")
                 .font(.headline)
             Spacer()
-            Button("Retour") { onDismiss() }
+            Button("Back") { onDismiss() }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
         }
@@ -72,7 +72,7 @@ struct PreferencesView: View {
     // MARK: - Tab Bar
 
     private var tabBar: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 4) {
             ForEach(Tab.allCases, id: \.self) { tab in
                 Button {
                     selectedTab = tab
@@ -84,13 +84,20 @@ struct PreferencesView: View {
                             .font(.callout)
                             .fontWeight(selectedTab == tab ? .semibold : .regular)
                     }
-                    .padding(.horizontal, 14)
+                    .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                     .frame(maxWidth: .infinity)
                     .background(
-                        selectedTab == tab
-                            ? Color.accentColor.opacity(0.12)
-                            : Color.clear
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(selectedTab == tab
+                                  ? Color.accentColor.opacity(0.12)
+                                  : Color.clear)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(selectedTab == tab
+                                            ? Color.accentColor.opacity(0.2)
+                                            : Color.clear, lineWidth: 0.5)
+                            )
                     )
                     .foregroundStyle(selectedTab == tab ? .primary : .secondary)
                     .contentShape(Rectangle())
@@ -98,8 +105,8 @@ struct PreferencesView: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
     }
 
     // MARK: - Status Bar
@@ -164,7 +171,7 @@ struct AISettingsSection: View {
 
     private var providerCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Provider IA", systemImage: "cpu")
+            Label("AI Provider", systemImage: "cpu")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
@@ -184,7 +191,7 @@ struct AISettingsSection: View {
 
     private var providerOptions: [ProviderOption] {
         [
-            ProviderOption(id: "ollama", name: "Ollama", description: "Local, gratuit, privé", icon: "desktopcomputer", needsKey: false),
+            ProviderOption(id: "ollama", name: "Ollama", description: String(localized: "Local, free, private"), icon: "desktopcomputer", needsKey: false),
             ProviderOption(id: "claude", name: "Claude", description: "Anthropic API", icon: "brain", needsKey: true),
             ProviderOption(id: "openai", name: "OpenAI", description: "GPT-4o-mini", icon: "globe", needsKey: true),
         ]
@@ -242,7 +249,7 @@ struct AISettingsSection: View {
 
     private var apiKeysCard: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("Clés API", systemImage: "key.fill")
+            Label("API Keys", systemImage: "key.fill")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
@@ -265,7 +272,7 @@ struct AISettingsSection: View {
             HStack(spacing: 4) {
                 Image(systemName: "lock.shield")
                     .font(.caption)
-                Text("Clés chiffrées dans le Keychain macOS")
+                Text("Keys encrypted in macOS Keychain")
                     .font(.caption)
             }
             .foregroundStyle(.secondary)
@@ -299,12 +306,12 @@ struct AISettingsSection: View {
                     .textFieldStyle(.roundedBorder)
                     .font(.system(.body, design: .monospaced))
 
-                Button(isSaved.wrappedValue ? "Modifier" : "Sauver") {
+                Button(isSaved.wrappedValue ? String(localized: "Edit") : String(localized: "Save")) {
                     do {
                         try KeychainService.save(apiKey: key.wrappedValue, for: keychainKey)
                         key.wrappedValue = ""
                         isSaved.wrappedValue = true
-                        onStatus("Clé \(name) sauvegardée ✓", false)
+                        onStatus(String(localized: "Key \(name) saved ✓"), false)
                     } catch {
                         onStatus(error.localizedDescription, true)
                     }
@@ -318,7 +325,7 @@ struct AISettingsSection: View {
                         do {
                             try KeychainService.delete(for: keychainKey)
                             isSaved.wrappedValue = false
-                            onStatus("Clé \(name) supprimée", false)
+                            onStatus(String(localized: "Key \(name) deleted"), false)
                         } catch {
                             onStatus(error.localizedDescription, true)
                         }
@@ -352,7 +359,7 @@ struct AISettingsSection: View {
                 }
 
                 HStack(spacing: 8) {
-                    Text("Modèle")
+                    Text("Model")
                         .font(.body)
                         .frame(width: 50, alignment: .trailing)
                     TextField("llama3.2", text: $ollamaModel)
@@ -372,7 +379,7 @@ struct AISettingsSection: View {
                                 Image(systemName: "bolt.fill")
                                     .font(.caption)
                             }
-                            Text("Tester la connexion")
+                            Text("Test connection")
                         }
                     }
                     .buttonStyle(.bordered)
@@ -399,7 +406,7 @@ struct AISettingsSection: View {
         ollamaStatus = nil
         Task {
             guard let url = URL(string: "\(ollamaURL)/api/tags") else {
-                ollamaStatus = "URL invalide"
+                ollamaStatus = String(localized: "Invalid URL")
                 isCheckingOllama = false
                 return
             }
@@ -411,15 +418,15 @@ struct AISettingsSection: View {
                     if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                        let models = json["models"] as? [[String: Any]] {
                         let names = models.compactMap { $0["name"] as? String }
-                        ollamaStatus = "✓ \(names.count) modèle\(names.count > 1 ? "s" : "")"
+                        ollamaStatus = "✓ \(names.count) model\(names.count > 1 ? "s" : "")"
                     } else {
-                        ollamaStatus = "✓ Connecté"
+                        ollamaStatus = String(localized: "Connected ✓")
                     }
                 } else {
-                    ollamaStatus = "Erreur HTTP"
+                    ollamaStatus = String(localized: "HTTP Error")
                 }
             } catch {
-                ollamaStatus = "Hors ligne"
+                ollamaStatus = String(localized: "Offline")
             }
             isCheckingOllama = false
         }
@@ -433,6 +440,7 @@ struct GeneralSettingsSection: View {
     @AppStorage("summaryLanguage") private var summaryLanguage: String = "français"
     @AppStorage("shortcutKeyCode") private var shortcutKeyCode: Int = 15
     @AppStorage("shortcutModifiers") private var shortcutModifiers: Int = 0
+    @AppStorage("appAppearance") private var appAppearance: String = "system"
 
     @State private var currentShortcut: ShortcutKey = .defaultShortcut
 
@@ -448,6 +456,8 @@ struct GeneralSettingsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             languageCard
+            Divider()
+            appearanceCard
             Divider()
             shortcutCard
             Divider()
@@ -471,7 +481,7 @@ struct GeneralSettingsSection: View {
 
     private var languageCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Langue des résumés", systemImage: "globe")
+            Label("Summary language", systemImage: "globe")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
@@ -506,9 +516,44 @@ struct GeneralSettingsSection: View {
                 }
             }
 
-            Text("Les résumés IA seront générés dans cette langue")
+            Text("AI summaries will be generated in this language")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    // MARK: - Apparence
+
+    private var appearanceCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Appearance", systemImage: "paintbrush")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+
+            // Picker segmenté : System / Light / Dark
+            // C'est comme un groupe de radio buttons en HTML.
+            Picker("", selection: $appAppearance) {
+                Text("System").tag("system")
+                Text("Light").tag("light")
+                Text("Dark").tag("dark")
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: appAppearance) { _, newValue in
+                applyAppearance(newValue)
+            }
+        }
+    }
+
+    private func applyAppearance(_ mode: String) {
+        // NSApp.effectiveAppearance contrôle le thème de toute l'app.
+        // nil = suivre le système, sinon on force un thème.
+        switch mode {
+        case "light":
+            NSApp.appearance = NSAppearance(named: .aqua)
+        case "dark":
+            NSApp.appearance = NSAppearance(named: .darkAqua)
+        default:
+            NSApp.appearance = nil  // Suit le système
         }
     }
 
@@ -516,13 +561,13 @@ struct GeneralSettingsSection: View {
 
     private var shortcutCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Raccourci global", systemImage: "keyboard")
+            Label("Global shortcut", systemImage: "keyboard")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
             ShortcutRecorderView(shortcut: $currentShortcut)
 
-            Text("Ce raccourci active l'app depuis n'importe quelle application")
+            Text("This shortcut activates the app from any application")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -532,7 +577,7 @@ struct GeneralSettingsSection: View {
 
     private var aboutCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("À propos", systemImage: "info.circle")
+            Label("About", systemImage: "info.circle")
                 .font(.subheadline)
                 .fontWeight(.semibold)
 
@@ -547,7 +592,7 @@ struct GeneralSettingsSection: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Text("Capture, résume et exporte vos articles")
+                Text("Capture, summarize and export your articles")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 

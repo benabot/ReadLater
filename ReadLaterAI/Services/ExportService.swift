@@ -24,11 +24,11 @@ enum ExportService {
         var errorDescription: String? {
             switch self {
             case .noContent:
-                "Aucun contenu à exporter (résumé ou texte manquant)"
+                String(localized: "No content to export (summary or text missing)")
             case .appNotInstalled(let app):
-                "\(app) ne semble pas installé sur ce Mac"
+                String(localized: "\(app) does not seem to be installed on this Mac")
             case .exportFailed(let detail):
-                "Erreur d'export : \(detail)"
+                String(localized: "Export error: \(detail)")
             }
         }
     }
@@ -56,7 +56,7 @@ enum ExportService {
             case .ulysses: "Ulysses"
             case .evernote: "Evernote"
             case .notes: "Notes"
-            case .clipboard: "Copier en Markdown"
+            case .clipboard: String(localized: "Copy as Markdown")
             }
         }
 
@@ -115,13 +115,13 @@ enum ExportService {
         lines.append("")
 
         if let summary = article.summary {
-            lines.append("## Résumé")
+            lines.append("## \(String(localized: "Summary"))")
             lines.append("")
             lines.append(summary.tldr)
             lines.append("")
 
             if !summary.keyPoints.isEmpty {
-                lines.append("## Points clés")
+                lines.append("## \(String(localized: "Key points"))")
                 lines.append("")
                 for point in summary.keyPoints {
                     lines.append("- \(point)")
@@ -129,12 +129,12 @@ enum ExportService {
                 lines.append("")
             }
 
-            lines.append("**Temps de lecture estimé** : \(summary.readingTime) min")
+            lines.append("**\(String(localized: "Estimated reading time"))** : \(summary.readingTime) min")
             lines.append("")
 
             if !summary.tags.isEmpty {
                 let tagsString = summary.tags.map { "#\($0)" }.joined(separator: " ")
-                lines.append("**Tags** : \(tagsString)")
+                lines.append("**\(String(localized: "Tags"))** : \(tagsString)")
                 lines.append("")
             }
         } else if let text = article.extractedText {
@@ -150,9 +150,10 @@ enum ExportService {
         let formatter = DateFormatter()
         formatter.dateStyle = .long
         formatter.timeStyle = .short
-        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.locale = Locale.current
         lines.append("---")
-        lines.append("*Sauvegardé le \(formatter.string(from: article.dateAdded)) via ReadLater AI*")
+        let dateStr = formatter.string(from: article.dateAdded)
+        lines.append("*\(String(localized: "Saved on \(dateStr) via ReadLater AI"))*")
 
         return lines.joined(separator: "\n")
     }
