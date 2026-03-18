@@ -34,6 +34,7 @@ struct ContentView: View {
     @State private var clipboardMonitor = ClipboardMonitor()
     @State private var viewMode: ViewMode = .articles
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
+    @AppStorage("appAppearance") private var appAppearance: String = "system"
 
     // Recherche, filtres & tri
     @State private var searchText: String = ""
@@ -172,8 +173,19 @@ struct ContentView: View {
         }
         .frame(width: 400, height: 540)
         .background(.ultraThinMaterial)
+        .preferredColorScheme(resolvedColorScheme)
         .task { clipboardMonitor.start() }
         .onAppear { if !hasSeenOnboarding { viewMode = .onboarding } }
+    }
+
+    /// Convertit le choix d'apparence en ColorScheme pour SwiftUI.
+    /// .preferredColorScheme force le thème immédiatement sur toute la vue.
+    private var resolvedColorScheme: ColorScheme? {
+        switch appAppearance {
+        case "light": .light
+        case "dark": .dark
+        default: nil  // nil = suit le système
+        }
     }
 
     // MARK: - Articles View

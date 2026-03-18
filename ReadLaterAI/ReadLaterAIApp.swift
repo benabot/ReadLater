@@ -1,13 +1,6 @@
 import SwiftUI
 import SwiftData
 import UserNotifications
-@preconcurrency import ApplicationServices
-
-/// Demande la permission Accessibilité en dehors de tout actor.
-private func requestAccessibilityTrust() {
-    let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
-    AXIsProcessTrustedWithOptions(options)
-}
 
 @main
 struct ReadLaterAIApp: App {
@@ -15,7 +8,6 @@ struct ReadLaterAIApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        // Scène vide — toute l'UI est dans le NSPopover via l'AppDelegate.
         Settings {}
     }
 }
@@ -37,11 +29,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Launch
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // CRITIQUE : Désactiver l'Automatic Termination.
-        // Sans ça, macOS tue l'app quand il n'y a pas de fenêtre visible
-        // (ce qui est toujours le cas pour une app menu bar).
-        // C'est l'équivalent de "process.on('SIGTERM', () => {})" en Node.js —
-        // on dit au système de ne PAS tuer notre process.
         ProcessInfo.processInfo.disableAutomaticTermination("Menu bar app must stay alive")
         ProcessInfo.processInfo.disableSuddenTermination()
 
@@ -51,24 +38,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         loadAndApplyShortcut()
         observeShortcutChanges()
         requestNotificationPermission()
-        requestAccessibilityPermission()
-        applyStoredAppearance()
     }
 
     // MARK: - Prevent Termination
 
-    /// Empêche macOS de quitter l'app quand le popover se ferme.
-    /// Sans ça, macOS considère que l'app "n'a plus de raison de vivre"
-    /// et la termine (applicationShouldTerminate).
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        return .terminateCancel
+        .terminateCancel
     }
 
-    /// Empêche la terminaison quand la dernière fenêtre se ferme.
-    /// Par défaut, macOS quitte une app quand sa dernière fenêtre est fermée.
-    /// Pour une app menu bar, c'est catastrophique — le popover compte comme une fenêtre.
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return false
+        false
     }
 
     // MARK: - SwiftData
@@ -92,8 +71,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover.animates = true
 
         let contentView = ContentView(onQuit: {
-            // Seule façon de quitter : le bouton "Quitter" explicite.
-            // On réactive la terminaison avant de quitter.
             ProcessInfo.processInfo.enableAutomaticTermination("User requested quit")
             ProcessInfo.processInfo.enableSuddenTermination()
             NSApplication.shared.terminate(nil)
@@ -128,8 +105,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             NSApp.activate(ignoringOtherApps: true)
-            // Réappliquer le thème car la window du popover est recréée à chaque ouverture
-            applyStoredAppearance()
         }
     }
 
@@ -189,43 +164,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // MARK: - Notifications
-
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
-    }
-
-    /// Demande la permission Accessibilité (nécessaire pour le raccourci global).
-    /// AXIsProcessTrustedWithOptions avec kAXTrustedCheckOptionPrompt = true
-    /// affiche la popup système qui propose d'ajouter l'app dans les réglages.
-    private func requestAccessibilityPermission() {
-        requestAccessibilityTrust()
-    }
-
-    // MARK: - Appearance
-
-    private func applyStoredAppearance() {
-        let mode = UserDefaults.standard.string(forKey: "appAppearance") ?? "system"
-        applyAppearance(mode)
-    }
-
-    /// Applique le thème immédiatement sur le popover ouvert.
-    func applyAppearance(_ mode: String) {
-        let appearance: NSAppearance?
-        switch mode {
-        case "light":
-            appearance = NSAppearance(named: .aqua)
-        case "dark":
-            appearance = NSAppearance(named: .darkAqua)
-        default:
-            appearance = nil
-        }
-        NSApp.appearance = appearance
-        // Forcer la mise à jour immédiate du popover
-        if let vc = popover?.contentViewController {
-            vc.view.appearance = appearance
-            vc.view.window?.appearance = appearance
-        }
     }
 
     private func removeShortcutMonitors() {

@@ -1,5 +1,4 @@
 import SwiftUI
-import ApplicationServices
 
 // MARK: - PreferencesView
 
@@ -482,16 +481,6 @@ struct GeneralSettingsSection: View {
                 Text("Dark").tag("dark")
             }
             .pickerStyle(.segmented)
-            .onChange(of: appAppearance) { _, newValue in
-                applyAppearance(newValue)
-            }
-        }
-    }
-
-    private func applyAppearance(_ mode: String) {
-        // Appeler l'AppDelegate qui applique le thème sur l'app ET le popover.
-        if let appDelegate = NSApp.delegate as? AppDelegate {
-            appDelegate.applyAppearance(mode)
         }
     }
 
@@ -508,32 +497,6 @@ struct GeneralSettingsSection: View {
             Text("This shortcut activates the app from any application")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-
-            // Vérifier la permission Accessibilité (nécessaire pour le raccourci global)
-            if !AXIsProcessTrusted() {
-                HStack(spacing: 6) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
-                        .font(.caption)
-                    Text("Accessibility permission required")
-                        .font(.caption)
-                        .foregroundStyle(.orange)
-                    Spacer()
-                    Button("Open Settings") {
-                        NSWorkspace.shared.open(
-                            URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-                        )
-                    }
-                    .font(.caption)
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.mini)
-                }
-                .padding(8)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color.orange.opacity(0.08))
-                )
-            }
         }
     }
 
