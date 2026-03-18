@@ -163,3 +163,20 @@
 /* === Delete & Notifications === */
 "Delete" = "Supprimer";
 "Summary ready: %@" = "Résumé prêt : %@";
+
+
+/* === Sort === */
+"Newest first" = "Plus récents";
+"Oldest first" = "Plus anciens";
+"Title A→Z" = "Titre A→Z";
+"Longest first" = "Plus longs";
+
+/* === Batch === */
+"Summarize all unsummarized articles" = "Résumer tous les articles non résumés";
+"Batch complete: %lld articles summarized" = "Batch terminé : %lld articles résumés";
+
+/* === Appearance === */
+"Appearance" = "Apparence";
+"System" = "Système";
+"Light" = "Clair";
+"Dark" = "Sombre";

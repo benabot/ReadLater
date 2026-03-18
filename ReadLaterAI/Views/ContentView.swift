@@ -35,10 +35,40 @@ struct ContentView: View {
     @State private var viewMode: ViewMode = .articles
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding: Bool = false
 
-    // Recherche & filtres
+    // Recherche, filtres & tri
     @State private var searchText: String = ""
     @State private var activeFilter: ArticleFilter = .all
     @State private var isSearching: Bool = false
+    @State private var sortOrder: ArticleSortOrder = .dateDesc
+    @State private var isBatchSummarizing: Bool = false
+    @State private var batchProgress: Int = 0
+    @State private var batchTotal: Int = 0
+
+    // Tri des articles
+    enum ArticleSortOrder: String, CaseIterable {
+        case dateDesc
+        case dateAsc
+        case title
+        case wordCount
+
+        var label: String {
+            switch self {
+            case .dateDesc: String(localized: "Newest first")
+            case .dateAsc: String(localized: "Oldest first")
+            case .title: String(localized: "Title A→Z")
+            case .wordCount: String(localized: "Longest first")
+            }
+        }
+
+        var icon: String {
+            switch self {
+            case .dateDesc: "arrow.down"
+            case .dateAsc: "arrow.up"
+            case .title: "textformat.abc"
+            case .wordCount: "text.word.spacing"
+            }
+        }
+    }
 
     // Enum des filtres disponibles.
     // C'est comme un système de routes/tabs pour filtrer la liste.
@@ -94,6 +124,18 @@ struct ContentView: View {
                 ($0.summary?.tags.contains(where: { $0.lowercased().contains(query) }) ?? false) ||
                 ($0.summary?.tldr.lowercased().contains(query) ?? false)
             }
+        }
+
+        // Appliquer le tri
+        switch sortOrder {
+        case .dateDesc:
+            result.sort { $0.dateAdded > $1.dateAdded }
+        case .dateAsc:
+            result.sort { $0.dateAdded < $1.dateAdded }
+        case .title:
+            result.sort { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+        case .wordCount:
+            result.sort { $0.wordCount > $1.wordCount }
         }
 
         return result
@@ -311,6 +353,35 @@ struct ContentView: View {
     private var filterBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
+                // Menu tri
+                Menu {
+                    ForEach(ArticleSortOrder.allCases, id: \.self) { order in
+                        Button {
+                            withAnimation { sortOrder = order }
+                        } label: {
+                            HStack {
+                                Label(order.label, systemImage: order.icon)
+                                if sortOrder == order {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(
+                            Capsule()
+                                .fill(Color.primary.opacity(0.04))
+                        )
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+
                 ForEach(ArticleFilter.allCases, id: \.self) { filter in
                     let count = countForFilter(filter)
                     Button {
@@ -461,6 +532,33 @@ struct ContentView: View {
             }
             GlassFooterButton(icon: "safari") { openSafariBookmarks() }
 
+            // Bouton batch : résumer tous les articles non résumés
+            if unsummarizedCount > 0 {
+                if isBatchSummarizing {
+                    HStack(spacing: 4) {
+                        ProgressView()
+                            .controlSize(.mini)
+                        Text("\(batchProgress)/\(batchTotal)")
+                            .font(.system(.caption2, design: .rounded))
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.horizontal, 6)
+                } else {
+                    Button { batchSummarize() } label: {
+                        HStack(spacing: 3) {
+                            Image(systemName: "sparkles")
+                                .font(.caption2)
+                            Text("\(unsummarizedCount)")
+                                .font(.system(.caption2, design: .rounded, weight: .medium))
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                    }
+                    .buttonStyle(GlassButtonStyle(color: .purple))
+                    .help(String(localized: "Summarize all unsummarized articles"))
+                }
+            }
+
             Spacer()
 
             if !articles.isEmpty {
@@ -498,6 +596,55 @@ struct ContentView: View {
         let response = panel.runModal()
         if response == .OK, let url = panel.url {
             withAnimation(.easeInOut(duration: 0.2)) { viewMode = .safariImport(url) }
+        }
+    }
+
+    /// Nombre d'articles avec du texte extrait mais pas encore résumés.
+    private var unsummarizedCount: Int {
+        articles.filter { $0.extractedText != nil && $0.summary == nil }.count
+    }
+
+    /// Résume tous les articles non résumés en séquence.
+    @MainActor
+    private func batchSummarize() {
+        let toSummarize = articles.filter { $0.extractedText != nil && $0.summary == nil }
+        guard !toSummarize.isEmpty else { return }
+
+        let selectedProvider = UserDefaults.standard.string(forKey: "selectedProvider") ?? "ollama"
+        let language = UserDefaults.standard.string(forKey: "summaryLanguage") ?? "français"
+
+        isBatchSummarizing = true
+        batchProgress = 0
+        batchTotal = toSummarize.count
+
+        Task {
+            let provider: any LLMProvider = switch selectedProvider {
+            case "claude": ClaudeProvider()
+            case "openai": OpenAIProvider()
+            default: OllamaProvider()
+            }
+
+            for article in toSummarize {
+                guard let text = article.extractedText else { continue }
+                do {
+                    let summary = try await provider.summarize(text: text, language: language)
+                    article.summary = summary
+                    article.isRead = true
+                } catch {
+                    // On continue même si un article échoue
+                }
+                batchProgress += 1
+            }
+
+            isBatchSummarizing = false
+
+            // Notification de fin
+            let content = UNMutableNotificationContent()
+            content.title = "ReadLater AI"
+            content.body = String(localized: "Batch complete: \(batchProgress) articles summarized")
+            content.sound = .default
+            let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+            try? await UNUserNotificationCenter.current().add(request)
         }
     }
 

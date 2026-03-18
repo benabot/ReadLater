@@ -44,6 +44,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         loadAndApplyShortcut()
         observeShortcutChanges()
         requestNotificationPermission()
+        applyStoredAppearance()
     }
 
     // MARK: - Prevent Termination
@@ -180,6 +181,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func requestNotificationPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+    }
+
+    // MARK: - Appearance
+
+    private func applyStoredAppearance() {
+        let mode = UserDefaults.standard.string(forKey: "appAppearance") ?? "system"
+        switch mode {
+        case "light":
+            NSApp.appearance = NSAppearance(named: .aqua)
+        case "dark":
+            NSApp.appearance = NSAppearance(named: .darkAqua)
+        default:
+            NSApp.appearance = nil
+        }
     }
 
     private func removeShortcutMonitors() {

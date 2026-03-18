@@ -440,6 +440,7 @@ struct GeneralSettingsSection: View {
     @AppStorage("summaryLanguage") private var summaryLanguage: String = "français"
     @AppStorage("shortcutKeyCode") private var shortcutKeyCode: Int = 15
     @AppStorage("shortcutModifiers") private var shortcutModifiers: Int = 0
+    @AppStorage("appAppearance") private var appAppearance: String = "system"
 
     @State private var currentShortcut: ShortcutKey = .defaultShortcut
 
@@ -455,6 +456,8 @@ struct GeneralSettingsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             languageCard
+            Divider()
+            appearanceCard
             Divider()
             shortcutCard
             Divider()
@@ -516,6 +519,41 @@ struct GeneralSettingsSection: View {
             Text("AI summaries will be generated in this language")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    // MARK: - Apparence
+
+    private var appearanceCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Appearance", systemImage: "paintbrush")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+
+            // Picker segmenté : System / Light / Dark
+            // C'est comme un groupe de radio buttons en HTML.
+            Picker("", selection: $appAppearance) {
+                Text("System").tag("system")
+                Text("Light").tag("light")
+                Text("Dark").tag("dark")
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: appAppearance) { _, newValue in
+                applyAppearance(newValue)
+            }
+        }
+    }
+
+    private func applyAppearance(_ mode: String) {
+        // NSApp.effectiveAppearance contrôle le thème de toute l'app.
+        // nil = suivre le système, sinon on force un thème.
+        switch mode {
+        case "light":
+            NSApp.appearance = NSAppearance(named: .aqua)
+        case "dark":
+            NSApp.appearance = NSAppearance(named: .darkAqua)
+        default:
+            NSApp.appearance = nil  // Suit le système
         }
     }
 
