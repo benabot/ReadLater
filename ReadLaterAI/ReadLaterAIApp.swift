@@ -172,8 +172,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            guard !ShortcutRecordingState.shared.isRecording else { return }
-            self?.loadAndApplyShortcut()
+            Task { @MainActor in
+                guard !ShortcutRecordingState.shared.isRecording else { return }
+                self?.loadAndApplyShortcut()
+            }
         }
     }
 
