@@ -58,6 +58,7 @@
 		D7BD323786370BFFF38E3064 /* SafariImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariImportView.swift; sourceTree = "<group>"; };
 		D9D195938CBDEFBFF3F67F71 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E320462D625CB0AF7950A6AC /* HelpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpView.swift; sourceTree = "<group>"; };
+		EA6C2182C2CECEA35852F877 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		F3ADFA44FD4775D156C5929F /* ReadLaterAI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReadLaterAI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAAFCC422BF145E10D0EE682 /* OllamaProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OllamaProvider.swift; sourceTree = "<group>"; };
 		FC36821333C82C01F5958318 /* OpenAIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIProvider.swift; sourceTree = "<group>"; };
@@ -148,6 +149,7 @@
 			children = (
 				82FF68BF6EC82622F9A5A61D /* Assets.xcassets */,
 				046D6896F804DFF099313E78 /* icon.svg */,
+				EA6C2182C2CECEA35852F877 /* Info.plist */,
 				D9D195938CBDEFBFF3F67F71 /* Localizable.strings */,
 				6823D1F58D1D26790E95463B /* ReadLaterAI.entitlements */,
 			);
@@ -290,6 +292,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ReadLaterAI/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "ReadLater AI";
 				INFOPLIST_KEY_LSUIElement = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -436,6 +439,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ReadLaterAI/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "ReadLater AI";
 				INFOPLIST_KEY_LSUIElement = YES;
 				LD_RUNPATH_SEARCH_PATHS = (

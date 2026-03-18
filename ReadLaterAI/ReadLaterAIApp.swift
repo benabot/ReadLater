@@ -7,6 +7,7 @@ struct ReadLaterAIApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
+        // Scène vide — toute l'UI est dans le NSPopover via l'AppDelegate.
         Settings {}
     }
 }
@@ -19,26 +20,44 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private var modelContainer: ModelContainer!
-
-    // Raccourci global — monitors séparés
     private var globalMonitor: Any?
     private var localMonitor: Any?
-
-    // Valeurs actuelles du raccourci (pour détecter les vrais changements)
     private var currentKeyCode: UInt16 = 0
     private var currentModifiers: UInt = 0
-
-    // Observer UserDefaults (stocké pour pouvoir le retirer)
     private var defaultsObserver: NSObjectProtocol?
 
     // MARK: - Launch
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // CRITIQUE : Désactiver l'Automatic Termination.
+        // Sans ça, macOS tue l'app quand il n'y a pas de fenêtre visible
+        // (ce qui est toujours le cas pour une app menu bar).
+        // C'est l'équivalent de "process.on('SIGTERM', () => {})" en Node.js —
+        // on dit au système de ne PAS tuer notre process.
+        ProcessInfo.processInfo.disableAutomaticTermination("Menu bar app must stay alive")
+        ProcessInfo.processInfo.disableSuddenTermination()
+
         setupModelContainer()
         setupPopover()
         setupStatusItem()
         loadAndApplyShortcut()
         observeShortcutChanges()
+    }
+
+    // MARK: - Prevent Termination
+
+    /// Empêche macOS de quitter l'app quand le popover se ferme.
+    /// Sans ça, macOS considère que l'app "n'a plus de raison de vivre"
+    /// et la termine (applicationShouldTerminate).
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        return .terminateCancel
+    }
+
+    /// Empêche la terminaison quand la dernière fenêtre se ferme.
+    /// Par défaut, macOS quitte une app quand sa dernière fenêtre est fermée.
+    /// Pour une app menu bar, c'est catastrophique — le popover compte comme une fenêtre.
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return false
     }
 
     // MARK: - SwiftData
@@ -59,8 +78,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         popover = NSPopover()
         popover.behavior = .transient
         popover.contentSize = NSSize(width: 400, height: 540)
+        popover.animates = true
 
         let contentView = ContentView(onQuit: {
+            // Seule façon de quitter : le bouton "Quitter" explicite.
+            // On réactive la terminaison avant de quitter.
+            ProcessInfo.processInfo.enableAutomaticTermination("User requested quit")
+            ProcessInfo.processInfo.enableSuddenTermination()
             NSApplication.shared.terminate(nil)
         })
         .modelContainer(self.modelContainer)
@@ -96,14 +120,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // MARK: - Shortcut Management
+    // MARK: - Shortcut
 
-    /// Lit le raccourci depuis UserDefaults et installe les monitors.
     private func loadAndApplyShortcut() {
         let storedModifiers = UInt(UserDefaults.standard.integer(forKey: "shortcutModifiers"))
         let storedKeyCode = UInt16(UserDefaults.standard.integer(forKey: "shortcutKeyCode"))
 
-        // Utiliser le défaut ⌥⌘R si rien n'est configuré
         let shortcut: ShortcutKey
         if storedModifiers != 0 {
             shortcut = ShortcutKey(keyCode: storedKeyCode, modifiers: storedModifiers)
@@ -111,22 +133,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             shortcut = .defaultShortcut
         }
 
-        // Ne rien faire si le raccourci n'a pas changé
         guard shortcut.keyCode != currentKeyCode || shortcut.modifiers != currentModifiers else {
             return
         }
 
         currentKeyCode = shortcut.keyCode
         currentModifiers = shortcut.modifiers
-
-        // Retirer les anciens monitors
         removeShortcutMonitors()
 
-        // Installer les nouveaux
         let reqKey = shortcut.keyCode
         let reqMods = NSEvent.ModifierFlags(rawValue: shortcut.modifiers)
 
-        // Global — quand l'app n'est PAS au premier plan
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard !ShortcutRecordingState.shared.isRecording else { return }
             let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
@@ -135,7 +152,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        // Local — quand l'app EST au premier plan
         localMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard !ShortcutRecordingState.shared.isRecording else { return event }
             let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
@@ -147,17 +163,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// Observe uniquement les changements de raccourci (pas tous les UserDefaults).
     private func observeShortcutChanges() {
-        // On observe UserDefaults.didChangeNotification mais on ne recharge
-        // que si les clés du raccourci ont réellement changé (grâce au guard
-        // dans loadAndApplyShortcut).
         defaultsObserver = NotificationCenter.default.addObserver(
             forName: UserDefaults.didChangeNotification,
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            // Ignorer pendant l'enregistrement d'un nouveau raccourci
             guard !ShortcutRecordingState.shared.isRecording else { return }
             self?.loadAndApplyShortcut()
         }
@@ -167,8 +178,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let gm = globalMonitor { NSEvent.removeMonitor(gm); globalMonitor = nil }
         if let lm = localMonitor { NSEvent.removeMonitor(lm); localMonitor = nil }
     }
-
-    // MARK: - Cleanup
 
     func applicationWillTerminate(_ notification: Notification) {
         removeShortcutMonitors()

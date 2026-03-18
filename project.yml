@@ -44,6 +44,7 @@ targets:
         INFOPLIST_KEY_LSUIElement: true
         INFOPLIST_KEY_CFBundleDisplayName: "ReadLater AI"
         GENERATE_INFOPLIST_FILE: true
+        INFOPLIST_FILE: ReadLaterAI/Resources/Info.plist
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: "0.1.0"
         CODE_SIGN_ENTITLEMENTS: ReadLaterAI/Resources/ReadLaterAI.entitlements
