@@ -191,3 +191,7 @@
 "Accessibility required" = "Accessibilité requise";
 "To use the global shortcut, add ReadLater AI to System Settings → Privacy & Security → Accessibility" = "Pour utiliser le raccourci global, ajoutez ReadLater AI dans Réglages Système → Confidentialité et sécurité → Accessibilité";
 "Open Accessibility Settings" = "Ouvrir les réglages d'accessibilité";
+
+
+/* === Notes export === */
+"Notes (copy & open)" = "Notes (copier et ouvrir)";

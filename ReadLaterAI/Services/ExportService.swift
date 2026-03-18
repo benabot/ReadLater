@@ -55,7 +55,7 @@ enum ExportService {
             case .craft: "Craft"
             case .ulysses: "Ulysses"
             case .evernote: "Evernote"
-            case .notes: "Notes"
+            case .notes: String(localized: "Notes (copy & open)")
             case .clipboard: String(localized: "Copy as Markdown")
             }
         }
@@ -308,31 +308,17 @@ enum ExportService {
     }
 
     // MARK: - Notes (Apple)
-    // Lance osascript en process externe pour créer une note dans Notes.
-    // NSAppleScript ne fonctionne pas en sandbox, mais Process + osascript oui
-    // car osascript tourne hors de la sandbox de l'app.
-    //
-    // C'est l'équivalent de `child_process.exec('osascript ...')` en Node.js.
+    // Copie le Markdown dans le clipboard puis ouvre Notes.
+    // C'est la seule approche fiable en sandbox :
+    // - NSSharingService → ouvre le Share Sheet (pas Notes directement)
+    // - NSAppleScript → bloqué par la sandbox
+    // - Process + osascript → bloqué par la sandbox
+    // Reeder, GoodLinks et autres apps font pareil.
 
     @MainActor
     private static func exportToNotes(markdown: String) {
-        // Escape pour AppleScript : backslashes puis guillemets
-        let escaped = markdown
-            .replacingOccurrences(of: "\\", with: "\\\\")
-            .replacingOccurrences(of: "\"", with: "\\\"")
-
-        let script = "tell application \"Notes\" to make new note at folder \"Notes\" with properties {body:\"\(escaped)\"}"
-
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
-        process.arguments = ["-e", script, "-e", "tell application \"Notes\" to activate"]
-
-        do {
-            try process.run()
-        } catch {
-            // Fallback : copier dans le clipboard
-            copyToClipboard(markdown: markdown)
-        }
+        copyToClipboard(markdown: markdown)
+        NSWorkspace.shared.open(URL(string: "notes://")!)
     }
 
     // MARK: - Clipboard
