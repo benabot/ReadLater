@@ -308,15 +308,18 @@ enum ExportService {
     }
 
     // MARK: - Notes (Apple)
-    // Via NSSharingServicePicker — le panneau de partage macOS.
+    // Utilise NSSharingService directement (pas le Picker/Share Sheet).
+    // On cherche le service "com.apple.Notes.SharingExtension" pour envoyer
+    // directement dans Notes sans passer par le menu de partage.
 
     @MainActor
     private static func exportToNotes(markdown: String) {
-        let picker = NSSharingServicePicker(items: [markdown])
-
-        if let contentView = NSApp.windows.first?.contentView {
-            picker.show(relativeTo: .zero, of: contentView, preferredEdge: .minY)
+        // Chercher le service Notes parmi les services disponibles
+        let services = NSSharingService.sharingServices(forItems: [markdown])
+        if let notesService = services.first(where: { $0.title.contains("Notes") }) {
+            notesService.perform(withItems: [markdown])
         } else {
+            // Fallback : copier dans le clipboard si Notes n'est pas trouvé
             copyToClipboard(markdown: markdown)
         }
     }
