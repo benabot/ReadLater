@@ -46,7 +46,7 @@ targets:
         GENERATE_INFOPLIST_FILE: true
         INFOPLIST_FILE: ReadLaterAI/Resources/Info.plist
         CURRENT_PROJECT_VERSION: 1
-        MARKETING_VERSION: "0.1.0"
+        MARKETING_VERSION: "0.2.0"
         CODE_SIGN_ENTITLEMENTS: ReadLaterAI/Resources/ReadLaterAI.entitlements
         SWIFT_STRICT_CONCURRENCY: complete
         ENABLE_APP_SANDBOX: true
