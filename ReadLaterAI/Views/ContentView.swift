@@ -680,9 +680,25 @@ struct ArticleRow: View {
     @ViewBuilder
     private var actionBadge: some View {
         if article.summary != nil {
-            Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle")
-                .font(.callout)
-                .foregroundStyle(isExpanded ? Color.accentColor : Color.gray.opacity(0.3))
+            HStack(spacing: 6) {
+                // Bouton export — menu déroulant avec les mêmes options que le clic droit.
+                // Menu {} en SwiftUI est l'équivalent d'un <select> avec dropdown en HTML.
+                Menu {
+                    ExportMenuView(article: article)
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .menuStyle(.borderlessButton)
+                .fixedSize()
+
+                // Chevron expand/collapse
+                Image(systemName: isExpanded ? "chevron.up.circle.fill" : "chevron.down.circle")
+                    .font(.callout)
+                    .foregroundStyle(isExpanded ? Color.accentColor : Color.gray.opacity(0.3))
+            }
         } else if article.extractedText == nil {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.caption)
