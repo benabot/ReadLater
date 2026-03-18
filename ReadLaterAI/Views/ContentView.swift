@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
+import UserNotifications
 
 // MARK: - ContentView — Liquid Glass Design
 
@@ -645,7 +646,7 @@ struct ArticleRow: View {
             }
         }
         .onHover { h in withAnimation(.easeInOut(duration: 0.12)) { isHovered = h } }
-        .contextMenu { ExportMenuView(article: article) }
+        .contextMenu { ExportMenuView(article: article, onDelete: { deleteArticle() }) }
     }
 
     // MARK: - Site Initial (avatar coloré par domaine)
@@ -684,7 +685,7 @@ struct ArticleRow: View {
                 // Bouton export — menu déroulant avec les mêmes options que le clic droit.
                 // Menu {} en SwiftUI est l'équivalent d'un <select> avec dropdown en HTML.
                 Menu {
-                    ExportMenuView(article: article)
+                    ExportMenuView(article: article, onDelete: { deleteArticle() })
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                         .font(.caption)
@@ -778,9 +779,33 @@ struct ArticleRow: View {
                 article.summary = summary
                 article.isRead = true
                 withAnimation(.easeInOut(duration: 0.25)) { isExpanded = true }
+                sendSummaryNotification(title: article.title)
             } catch { summaryError = error.localizedDescription }
             isSummarizing = false
         }
+    }
+
+    private func deleteArticle() {
+        withAnimation(.easeInOut(duration: 0.2)) {
+            modelContext.delete(article)
+        }
+    }
+
+    /// Envoie une notification macOS quand le résumé est prêt.
+    /// UNUserNotificationCenter est l'API native pour les notifications.
+    /// C'est l'équivalent de l'API Notification du navigateur en JS.
+    private func sendSummaryNotification(title: String) {
+        let content = UNMutableNotificationContent()
+        content.title = "ReadLater AI"
+        content.body = String(localized: "Summary ready: \(title)")
+        content.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: nil  // nil = immédiat
+        )
+        UNUserNotificationCenter.current().add(request)
     }
 
     private func resolveProvider() -> any LLMProvider {

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 @main
 struct ReadLaterAIApp: App {
@@ -42,6 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setupStatusItem()
         loadAndApplyShortcut()
         observeShortcutChanges()
+        requestNotificationPermission()
     }
 
     // MARK: - Prevent Termination
@@ -172,6 +174,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             guard !ShortcutRecordingState.shared.isRecording else { return }
             self?.loadAndApplyShortcut()
         }
+    }
+
+    // MARK: - Notifications
+
+    private func requestNotificationPermission() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
 
     private func removeShortcutMonitors() {

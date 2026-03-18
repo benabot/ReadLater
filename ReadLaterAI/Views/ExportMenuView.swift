@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ExportMenuView: View {
     let article: Article
+    var onDelete: (() -> Void)? = nil
     @State private var exportError: String?
     @State private var showCopiedFeedback: Bool = false
 
@@ -42,6 +43,16 @@ struct ExportMenuView: View {
                 }
             } label: {
                 Label("Open in browser", systemImage: "safari")
+            }
+
+            // Supprimer
+            if let onDelete {
+                Divider()
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
             }
         }
     }

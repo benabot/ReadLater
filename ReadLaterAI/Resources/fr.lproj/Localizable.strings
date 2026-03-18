@@ -158,3 +158,8 @@
 "No results" = "Aucun résultat";
 "Try a different search term" = "Essayez un autre terme de recherche";
 "Show all" = "Tout afficher";
+
+
+/* === Delete & Notifications === */
+"Delete" = "Supprimer";
+"Summary ready: %@" = "Résumé prêt : %@";
