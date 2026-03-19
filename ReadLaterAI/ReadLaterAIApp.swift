@@ -104,13 +104,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // MARK: - Global Shortcut ⌥⌘R (hardcoded)
+    // MARK: - Global Shortcut ⌃⌥⌘; (hardcoded)
     // Un seul raccourci fixe, enregistré une fois au lancement.
-    // Pas de UserDefaults, pas d'observer, pas de recreation dynamique.
+    // Utilise ShortcutKey pour centraliser keyCode + modifiers.
+    // NSEvent.addGlobalMonitorForEvents nécessite Accessibility dans
+    // System Settings → Privacy & Security → Accessibility.
 
     private func setupShortcut() {
-        let reqKey: UInt16 = 15  // kVK_ANSI_R
-        let reqMods: NSEvent.ModifierFlags = [.option, .command]
+        let reqKey = ShortcutKey.keyCode       // 41 = kVK_ANSI_Semicolon
+        let reqMods = ShortcutKey.modifiers     // [.control, .option, .command]
 
         // Global — quand l'app n'est PAS au premier plan (ex: utilisateur dans Safari)
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in

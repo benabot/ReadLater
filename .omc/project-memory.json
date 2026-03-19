@@ -1,0 +1,98 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1773941778988,
+  "projectRoot": "/Users/benoitabot/Sites/ReadLater/ReadlLater",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "ReadLaterAI": {
+      "path": "ReadLaterAI",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1773941778939,
+      "keyFiles": [
+        "CLAUDE.md",
+        "ReadLaterAIApp.swift"
+      ]
+    },
+    "ReadLaterAI.xcodeproj": {
+      "path": "ReadLaterAI.xcodeproj",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1773941778941,
+      "keyFiles": [
+        "project.pbxproj"
+      ]
+    },
+    "ReadLaterAI/Models": {
+      "path": "ReadLaterAI/Models",
+      "purpose": "Data models",
+      "fileCount": 1,
+      "lastAccessed": 1773941778942,
+      "keyFiles": [
+        "Article.swift"
+      ]
+    },
+    "ReadLaterAI/Services": {
+      "path": "ReadLaterAI/Services",
+      "purpose": "Business logic services",
+      "fileCount": 5,
+      "lastAccessed": 1773941778943,
+      "keyFiles": [
+        "ArticleExtractor.swift",
+        "ClipboardMonitor.swift",
+        "ExportService.swift"
+      ]
+    },
+    "ReadLaterAI/Views": {
+      "path": "ReadLaterAI/Views",
+      "purpose": "View templates",
+      "fileCount": 6,
+      "lastAccessed": 1773941778943,
+      "keyFiles": [
+        "ContentView.swift",
+        "ExportMenuView.swift",
+        "HelpView.swift"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "ReadLaterAI/ReadLaterAIApp.swift",
+      "accessCount": 8,
+      "lastAccessed": 1773942509972,
+      "type": "directory"
+    },
+    {
+      "path": "ReadLaterAI/Utilities/GlobalShortcut.swift",
+      "accessCount": 4,
+      "lastAccessed": 1773942479816,
+      "type": "directory"
+    }
+  ],
+  "userDirectives": []
+}
