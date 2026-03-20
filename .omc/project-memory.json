@@ -83,14 +83,38 @@
   "hotPaths": [
     {
       "path": "ReadLaterAI/ReadLaterAIApp.swift",
-      "accessCount": 8,
-      "lastAccessed": 1773942509972,
+      "accessCount": 13,
+      "lastAccessed": 1774005471806,
       "type": "directory"
     },
     {
       "path": "ReadLaterAI/Utilities/GlobalShortcut.swift",
+      "accessCount": 7,
+      "lastAccessed": 1774005440709,
+      "type": "directory"
+    },
+    {
+      "path": "ReadLaterAI/Views/PreferencesView.swift",
+      "accessCount": 6,
+      "lastAccessed": 1774005486650,
+      "type": "file"
+    },
+    {
+      "path": "ReadLaterAI/CLAUDE.md",
       "accessCount": 4,
-      "lastAccessed": 1773942479816,
+      "lastAccessed": 1774005665439,
+      "type": "file"
+    },
+    {
+      "path": "project.yml",
+      "accessCount": 2,
+      "lastAccessed": 1774002337845,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1774002328807,
       "type": "directory"
     }
   ],
