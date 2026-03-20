@@ -51,3 +51,13 @@ targets:
         SWIFT_STRICT_CONCURRENCY: complete
         ENABLE_APP_SANDBOX: true
         SWIFT_VERSION: "6.0"
+
+schemes:
+  ReadLaterAI:
+    build:
+      targets:
+        ReadLaterAI: all
+    run:
+      config: Debug
+    archive:
+      config: Release

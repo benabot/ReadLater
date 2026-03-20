@@ -20,8 +20,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private var modelContainer: ModelContainer!
-    private var globalMonitor: Any?
-    private var localMonitor: Any?
+    private var hotKeyManager: CarbonHotKeyManager?
 
     // MARK: - Launch
 
@@ -104,33 +103,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // MARK: - Global Shortcut ⌃⌥⌘; (hardcoded)
-    // Un seul raccourci fixe, enregistré une fois au lancement.
-    // Utilise ShortcutKey pour centraliser keyCode + modifiers.
-    // NSEvent.addGlobalMonitorForEvents nécessite Accessibility dans
-    // System Settings → Privacy & Security → Accessibility.
+    // MARK: - Global Shortcut ⌃⌥⌘M (Carbon RegisterEventHotKey)
 
     private func setupShortcut() {
-        let reqKey = ShortcutKey.keyCode       // 41 = kVK_ANSI_Semicolon
-        let reqMods = ShortcutKey.modifiers     // [.control, .option, .command]
-
-        // Global — quand l'app n'est PAS au premier plan (ex: utilisateur dans Safari)
-        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            if event.keyCode == reqKey && mods == reqMods {
-                DispatchQueue.main.async { self?.togglePopover() }
-            }
+        let manager = CarbonHotKeyManager()
+        manager.onTriggered = { [weak self] in
+            self?.togglePopover()
         }
-
-        // Local — quand l'app EST au premier plan (pour fermer avec le même raccourci)
-        localMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            if event.keyCode == reqKey && mods == reqMods {
-                DispatchQueue.main.async { self?.togglePopover() }
-                return nil
-            }
-            return event
-        }
+        manager.register()
+        hotKeyManager = manager
     }
 
     // MARK: - Notifications
@@ -142,7 +123,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Cleanup
 
     func applicationWillTerminate(_ notification: Notification) {
-        if let gm = globalMonitor { NSEvent.removeMonitor(gm) }
-        if let lm = localMonitor { NSEvent.removeMonitor(lm) }
+        hotKeyManager?.unregister()
     }
 }

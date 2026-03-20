@@ -50,7 +50,7 @@ ReadlLater/
 │   ├── ExportMenuView.swift    # Menu contextuel d'export
 │   └── PreferencesView.swift   # Settings (LLM, Export, Capture, Général)
 └── Utilities/
-    └── GlobalShortcut.swift    # ⌥⌘R pour toggle popover
+    └── GlobalShortcut.swift    # ⌃⌥⌘M — Carbon RegisterEventHotKey (no Accessibility needed)
 ```
 
 ---
@@ -189,7 +189,7 @@ Pour Notes : `NSSharingServicePicker` avec le contenu Markdown.
 2. **Capture d'URL & extraction** ✅ — Fetch HTML, SwiftSoup, clipboard, Safari Reading List
 3. **Couche LLM multi-provider** ✅ — Protocol, Claude/OpenAI/Ollama, Keychain
 4. **Export multi-cible** ✅ — Bear, iA Writer, Obsidian, Craft, Ulysses, Evernote, Notes, Clipboard
-5. **Préférences & UI finale** ✅ — Settings, provider selector, Keychain UI, raccourci ⌥⌘R
+5. **Préférences & UI finale** ✅ — Settings, provider selector, Keychain UI, raccourci ⌃⌥⌘M, Launch at login
 
 ---
 

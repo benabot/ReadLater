@@ -1,3 +1,4 @@
+import ServiceManagement
 import SwiftUI
 
 // MARK: - PreferencesView
@@ -439,14 +440,70 @@ struct AISettingsSection: View {
 struct GeneralSettingsSection: View {
 
     @AppStorage("appAppearance") private var appAppearance: String = "system"
+    @State private var launchAtLogin: Bool = false
+    @State private var launchAtLoginError: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             appearanceCard
             Divider()
+            launchAtLoginCard
+            Divider()
             shortcutCard
             Divider()
             aboutCard
+        }
+        .onAppear {
+            launchAtLogin = (SMAppService.mainApp.status == .enabled)
+        }
+    }
+
+    // MARK: - Launch at Login
+
+    private var launchAtLoginCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Startup", systemImage: "power")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+
+            Toggle(isOn: $launchAtLogin) {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.right.circle")
+                        .foregroundStyle(.secondary)
+                        .frame(width: 18)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Launch at login")
+                            .font(.body)
+                        Text("Automatically start ReadLater AI when you log in")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .toggleStyle(.switch)
+            .onChange(of: launchAtLogin) { _, newValue in
+                do {
+                    if newValue {
+                        try SMAppService.mainApp.register()
+                    } else {
+                        try SMAppService.mainApp.unregister()
+                    }
+                    launchAtLoginError = nil
+                } catch {
+                    launchAtLogin = !newValue
+                    launchAtLoginError = error.localizedDescription
+                }
+            }
+
+            if let errorMessage = launchAtLoginError {
+                HStack(spacing: 4) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                    Text(errorMessage)
+                        .font(.caption)
+                }
+                .foregroundStyle(.red)
+            }
         }
     }
 
@@ -488,45 +545,9 @@ struct GeneralSettingsSection: View {
                         .stroke(Color.primary.opacity(0.2), lineWidth: 1)
                 )
 
-            Text("This shortcut activates the app from any application")
+            Text("This shortcut works globally from any application")
                 .font(.caption)
                 .foregroundStyle(.secondary)
-
-            // Guide accessibilité
-            VStack(alignment: .leading, spacing: 6) {
-                Label("Accessibility required", systemImage: "hand.raised.fill")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.orange)
-
-                Text("To use the global shortcut, add ReadLater AI to System Settings → Privacy & Security → Accessibility")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-
-                Button {
-                    NSWorkspace.shared.open(
-                        URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
-                    )
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "gear")
-                            .font(.caption2)
-                        Text("Open Accessibility Settings")
-                            .font(.caption)
-                    }
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(Color.accentColor)
-            }
-            .padding(10)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.orange.opacity(0.06))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.orange.opacity(0.15), lineWidth: 0.5)
-                    )
-            )
         }
     }
 

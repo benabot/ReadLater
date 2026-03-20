@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2630"
+   LastUpgradeVersion = "1630"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
-      buildArchitectures = "Automatic">
+      runPostActionsOnFailure = "NO">
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "78507D4B7785390FC4A746B9"
-               BuildableName = "ReadLater AI.app"
+               BuildableName = "ReadLaterAI.app"
                BlueprintName = "ReadLaterAI"
                ReferencedContainer = "container:ReadLaterAI.xcodeproj">
             </BuildableReference>
@@ -28,7 +28,18 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES"
-      shouldAutocreateTestPlan = "YES">
+      onlyGenerateCoverageForSpecifiedTargets = "NO">
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "78507D4B7785390FC4A746B9"
+            BuildableName = "ReadLaterAI.app"
+            BlueprintName = "ReadLaterAI"
+            ReferencedContainer = "container:ReadLaterAI.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
+      <Testables>
+      </Testables>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -45,11 +56,13 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "78507D4B7785390FC4A746B9"
-            BuildableName = "ReadLater AI.app"
+            BuildableName = "ReadLaterAI.app"
             BlueprintName = "ReadLaterAI"
             ReferencedContainer = "container:ReadLaterAI.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -62,7 +75,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "78507D4B7785390FC4A746B9"
-            BuildableName = "ReadLater AI.app"
+            BuildableName = "ReadLaterAI.app"
             BlueprintName = "ReadLaterAI"
             ReferencedContainer = "container:ReadLaterAI.xcodeproj">
          </BuildableReference>
