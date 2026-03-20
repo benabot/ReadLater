@@ -88,21 +88,27 @@
       "type": "directory"
     },
     {
+      "path": "ReadLaterAI/Views/PreferencesView.swift",
+      "accessCount": 8,
+      "lastAccessed": 1774006041699,
+      "type": "file"
+    },
+    {
       "path": "ReadLaterAI/Utilities/GlobalShortcut.swift",
       "accessCount": 7,
       "lastAccessed": 1774005440709,
       "type": "directory"
     },
     {
-      "path": "ReadLaterAI/Views/PreferencesView.swift",
-      "accessCount": 6,
-      "lastAccessed": 1774005486650,
-      "type": "file"
-    },
-    {
       "path": "ReadLaterAI/CLAUDE.md",
       "accessCount": 4,
       "lastAccessed": 1774005665439,
+      "type": "file"
+    },
+    {
+      "path": "ReadLaterAI/Resources/fr.lproj/Localizable.strings",
+      "accessCount": 4,
+      "lastAccessed": 1774006093585,
       "type": "file"
     },
     {

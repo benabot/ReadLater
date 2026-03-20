@@ -14,6 +14,10 @@
 "%lld words" = "%lld mots";
 
 /* === PreferencesView === */
+"Startup" = "Démarrage";
+"Launch at login" = "Lancer au démarrage";
+"Automatically start ReadLater AI when you log in" = "Démarrer ReadLater AI automatiquement à l'ouverture de session";
+"This shortcut works globally from any application" = "Ce raccourci fonctionne depuis n'importe quelle application";
 "Preferences" = "Préférences";
 "Back" = "Retour";
 "AI" = "IA";
@@ -36,7 +40,6 @@
 "Summary language" = "Langue des résumés";
 "AI summaries will be generated in this language" = "Les résumés IA seront générés dans cette langue";
 "Global shortcut" = "Raccourci global";
-"This shortcut activates the app from any application" = "Ce raccourci active l'app depuis n'importe quelle application";
 "About" = "À propos";
 "Capture, summarize and export your articles" = "Capture, résume et exporte vos articles";
 
